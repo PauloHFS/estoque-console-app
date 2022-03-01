@@ -1,1 +1,1 @@
-# plp-haskell-project
+# estoque-console-app

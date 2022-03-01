@@ -1,3 +1,3 @@
-# Changelog for plp-haskell-project
+# Changelog for estoque-console-app
 
 ## Unreleased changes

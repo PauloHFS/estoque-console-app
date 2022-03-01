@@ -4,11 +4,11 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 
-name:           plp-haskell-project
+name:           estoque-console-app
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/plp-haskell-project#readme>
-homepage:       https://github.com/githubuser/plp-haskell-project#readme
-bug-reports:    https://github.com/githubuser/plp-haskell-project/issues
+description:    Please see the README on GitHub at <https://github.com/githubuser/estoque-console-app#readme>
+homepage:       https://github.com/githubuser/estoque-console-app#readme
+bug-reports:    https://github.com/githubuser/estoque-console-app/issues
 author:         Author name here
 maintainer:     example@example.com
 copyright:      2022 Author name here
@@ -21,7 +21,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/plp-haskell-project
+  location: https://github.com/githubuser/estoque-console-app
 
 library
   exposed-modules:
@@ -34,7 +34,7 @@ library
       base >=4.7 && <5
   default-language: Haskell2010
 
-executable plp-haskell-project-exe
+executable estoque-console-app-exe
   main-is: Main.hs
   other-modules:
       Paths_plp_haskell_project
@@ -43,10 +43,10 @@ executable plp-haskell-project-exe
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
-    , plp-haskell-project
+    , estoque-console-app
   default-language: Haskell2010
 
-test-suite plp-haskell-project-test
+test-suite estoque-console-app-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
@@ -56,5 +56,5 @@ test-suite plp-haskell-project-test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
-    , plp-haskell-project
+    , estoque-console-app
   default-language: Haskell2010
