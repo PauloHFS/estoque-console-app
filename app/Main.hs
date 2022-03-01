@@ -6,7 +6,8 @@ main :: IO ()
 main = do
   putStrLn ""
   putStrLn "Estoque Console App - Haskell Edition"
-  putStrLn "Commands:"
-  putStrLn ":l          - List all products"
-  putStrLn ":q          - Quit"
+  putStrLn "Commandos:"
+  putStrLn "c <nome> <quantidade> <preco> <validade>  - Add a new product to the inventory"
+  putStrLn "l                                         - Listar todos os produtos"
+  putStrLn "q                                         - Sair"
   prompt

@@ -1,26 +1,52 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-deferred-out-of-scope-variables #-}
 
-module Storage (readStorage) where
+module Storage (Product, readStorage) where
 
 import Control.Monad (unless)
 import qualified Data.ByteString.Lazy as BL
 import Data.Csv
 import qualified Data.Vector as V
+import Helpers (centsToBRL)
 import System.Directory (doesFileExist)
 
 data Product = Product
   { uid :: Int,
     nome :: String,
     quantidade :: Int,
-    preco :: Int,
+    preco :: Float,
     validade :: Int,
     created_at :: String,
     updated_at :: String
   }
-  deriving (Show, Eq)
+  deriving (Eq)
+
+instance Show Product where
+  show (Product uid nome quantidade preco validade created_at updated_at) =
+    show uid ++ " | " ++ nome ++ " | " ++ show quantidade ++ " | "
+      ++ "R$ "
+      ++ centsToBRL preco
+      ++ " | "
+      ++ show validade
+      ++ " | "
+      ++ created_at
+      ++ " | "
+      ++ updated_at
 
 instance FromNamedRecord Product where
   parseNamedRecord r = Product <$> r .: "uid" <*> r .: "nome" <*> r .: "quantidade" <*> r .: "preco" <*> r .: "validade" <*> r .: "created_at" <*> r .: "updated_at"
+
+instance ToNamedRecord Product where
+  toNamedRecord (Product uid nome quantidade preco validade created_at updated_at) =
+    namedRecord
+      [ "uid" .= uid,
+        "nome" .= nome,
+        "quantidade" .= quantidade,
+        "preco" .= preco,
+        "validade" .= validade,
+        "created_at" .= created_at,
+        "updated_at" .= updated_at
+      ]
 
 readStorage :: IO [Product]
 readStorage = do
