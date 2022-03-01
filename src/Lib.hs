@@ -4,21 +4,28 @@ module Lib
   )
 where
 
-import Storage (Product, readStorage)
+import Storage (Product, readStorage, writeStorage)
 
 prompt :: IO ()
 prompt = do
-  -- putStr "> " -- TODO: arrumar um jeito de mostrar isso aq
+  print "> " -- TODO: arrumar um jeito de mostrar isso aq
   command <- getLine
   interpret command
 
 interpret :: String -> IO ()
 -- TODO: Melhorar o print do storage
+interpret "c" = createProduct
 interpret "l" = listStorage
 interpret "q" = return ()
 interpret command = do
   putStrLn ("Invalid command: `" ++ command ++ "`")
   prompt
+
+createProduct :: IO ()
+createProduct = do
+  storage <- readStorage
+  writeStorage storage
+  print "Salvo!"
 
 listStorage :: IO ()
 listStorage = do
