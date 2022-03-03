@@ -33,7 +33,7 @@ data Produto = Produto
   }
   deriving (Generic, Eq)
 
--- create a new instance of teh Show class for Product
+-- create a new instance of the Show class for Product
 instance Show Produto where
   show p =
     "Produto { uid = "
