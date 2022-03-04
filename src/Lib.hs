@@ -1,55 +1,128 @@
 module Lib
-  ( prompt,
-    interpret,
+  ( menu,
   )
 where
 
-import qualified Data.Monoid as Storage
-import Storage (Produto, createProduct, readStorage, storageToProducts, writeStorage)
+import Data.Time
+import Storage
+  ( Produto,
+    createProduct,
+    created_at,
+    nome,
+    preco,
+    quantidade,
+    uid,
+    updated_at,
+    validade,
+    verifyStorage,
+  )
 
-prompt :: IO ()
-prompt = do
-  -- print "> " -- TODO: arrumar um jeito de mostrar isso aq
+menu :: IO ()
+menu = do
+  putStrLn ""
+  putStrLn "Estoque Console App - Haskell Edition"
+  putStrLn ""
+  putStrLn "Comandos:"
+  putStrLn "c       - Adiciona um novo produto ao inventário"
+  putStrLn "l       - Lista todos os produtos do inventário"
+  putStrLn "mq      - Modifica a quantidade de um produto"
+  putStrLn "mp      - Modifica o preço de um produto"
+  putStrLn "d       - Remove um produto do inventário"
+  putStrLn "v       - Verifica validade dos produtos"
+  putStrLn "z       - Verifica itens zerados"
+  putStrLn "q       - Sair"
+  prompt []
+
+prompt :: [Produto] -> IO ()
+prompt produtos = do
+  putStrLn "> "
   command <- getLine
-  interpret command
+  interpret command produtos
 
-interpret :: String -> IO ()
--- TODO: Melhorar o print do storage
-interpret "c" = create
-interpret "l" = listStorage
-interpret "q" = return ()
-interpret command = do
+interpret :: String -> [Produto] -> IO ()
+interpret "c" produtos = create produtos
+interpret "l" produtos = list produtos
+interpret "mq" produtos = updateQuantity produtos
+interpret "d" produtos = delete produtos
+interpret "z" produtos = filterByQuantityZero produtos
+interpret "q" produtos = return ()
+interpret command produtos = do
   putStrLn ("Invalid command: `" ++ command ++ "`")
-  prompt
+  prompt produtos
 
-create = do
-  storage <- readStorage
-
-  let uid = show (length storage + 1)
-  putStrLn "Enter the name of the product: "
+create :: [Produto] -> IO ()
+create produtos = do
+  let uid = length produtos + 1
+  putStrLn "Digite o numero do produto: "
   name <- getLine
-  putStrLn "Enter the quantity of the product: "
+  putStrLn "Digite a quantidade do produto: "
   quantidade <- getLine
-  putStrLn "Enter the price of the product: "
+  putStrLn "Digite o preco do produto: "
   preco <- getLine
-  putStrLn "Enter the validade of the product: "
+  putStrLn "Digite a validade do produto (em meses): "
   validade <- getLine
-
+  --tempoAtual <- getCurrentTime
   let product = createProduct uid name quantidade preco validade ("00/00/0000" :: String) ("00/00/0000" :: String)
-  let newStorage = product : storageToProducts storage
-  writeStorage newStorage
-  prompt
+  prompt (product : produtos)
 
-listStorage :: IO ()
-listStorage = do
-  storage <- readStorage
+list :: [Produto] -> IO ()
+list produtos = do
   putStrLn ""
   putStrLn "uid | nome | quantidade | preco | validade | created_at | updated_at"
-  prettyPrint (storageToProducts storage)
-  prompt
+  mapM_ print produtos
+  putStrLn ""
+  prompt produtos
 
-prettyPrint :: [Storage.Produto] -> IO ()
-prettyPrint [] = return ()
-prettyPrint product = do
-  print (show (head product))
-  prettyPrint (tail product)
+delete :: [Produto] -> IO ()
+delete produtos = do
+  putStrLn "Digite o uid do produto: "
+  uid <- getLine
+  let produtos' = filter (\p -> getUid p /= read uid) produtos
+  prompt produtos'
+
+updateQuantity :: [Produto] -> IO ()
+updateQuantity produtos = do
+  putStrLn "Digite o uid do produto: "
+  uid <- getLine
+  putStrLn "Digite a nova quantidade: "
+  newQuantity <- getLine
+
+  -- get a product by uid
+  let produto = head (filter (\p -> getUid p == read uid) produtos)
+  let produtos' = filter (\p -> getUid p /= read uid) produtos
+
+  let produto' = createProduct (read uid) (nome produto) newQuantity (preco produto) (validade produto) (created_at produto) (updated_at produto)
+
+  prompt (produto' : produtos')
+
+getUid :: Produto -> Int
+getUid = uid
+
+updatePrice :: [Produto] -> IO ()
+updatePrice produtos = do
+  putStrLn "Digite o uid do produto: "
+  uid <- getLine
+  putStrLn "Digite o novo preço: "
+  newPrice <- getLine
+
+  -- get a product by uid
+  let produto = head (filter (\p -> getUid p == read uid) produtos)
+  let produtos' = filter (\p -> getUid p /= read uid) produtos
+
+  let produto' = createProduct (read uid) (nome produto) (quantidade produto) newPrice (validade produto) (created_at produto) (updated_at produto)
+
+  prompt (produto' : produtos')
+
+filterByQuantityZero :: [Produto] -> IO ()
+filterByQuantityZero produtos = do
+  putStrLn ""
+  putStrLn "uid | nome | quantidade | preco | validade | created_at | updated_at"
+  print (verifyStorage produtos)
+  prompt produtos
+
+{-filterByValidade :: [Produto] -> IO ()
+filterByValidade produtos = do
+  putStrLn ""
+  putStrLn "uid | nome | quantidade | preco | validade | created_at | updated_at"
+  print (verifyValidade produtos)
+  prompt produtos-}

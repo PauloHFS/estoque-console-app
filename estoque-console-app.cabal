@@ -35,8 +35,10 @@ library
       base >=4.7 && <5
     , bytestring >=0.10.12.0
     , cassava >=0.5.2.0
+    , deepseq (>=1.1)
     , directory >=1.3.6.0
     , text >=1.2.4.1
+    , time >=1.9.2
     , vector >=0.12.3.1
   default-language: Haskell2010
 
@@ -51,9 +53,11 @@ executable estoque-console-app-exe
       base >=4.7 && <5
     , bytestring >=0.10.12.0
     , cassava >=0.5.2.0
+    , deepseq (>=1.1)
     , directory >=1.3.6.0
     , estoque-console-app
     , text >=1.2.4.1
+    , time >=1.9.2
     , vector >=0.12.3.1
   default-language: Haskell2010
 
@@ -69,8 +73,10 @@ test-suite estoque-console-app-test
       base >=4.7 && <5
     , bytestring >=0.10.12.0
     , cassava >=0.5.2.0
+    , deepseq (>=1.1)
     , directory >=1.3.6.0
     , estoque-console-app
     , text >=1.2.4.1
+    , time >=1.9.2
     , vector >=0.12.3.1
   default-language: Haskell2010
