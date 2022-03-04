@@ -2,7 +2,22 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-deferred-out-of-scope-variables #-}
 
-module Storage (Produto, readStorage, writeStorage, storageToProducts, createProduct) where
+module Storage
+  ( Produto,
+    readStorage,
+    writeStorage,
+    storageToProducts,
+    createProduct,
+    verifyStorage,
+    uid,
+    nome,
+    quantidade,
+    preco,
+    validade,
+    created_at,
+    updated_at,
+  )
+where
 
 import Control.Monad (unless)
 import qualified Data.ByteString.Lazy as BL
@@ -23,7 +38,7 @@ import qualified GHC.Read as BL
 import System.Directory (doesFileExist)
 
 data Produto = Produto
-  { uid :: String,
+  { uid :: Int,
     nome :: String,
     quantidade :: String,
     preco :: String,
@@ -36,21 +51,19 @@ data Produto = Produto
 -- create a new instance of the Show class for Product
 instance Show Produto where
   show p =
-    "Produto { uid = "
-      <> show (uid p)
-      <> ", nome = "
+    show (uid p)
+      <> " | "
       <> show (nome p)
-      <> ", quantidade = "
+      <> " | "
       <> show (quantidade p)
-      <> ", preco = "
+      <> " | "
       <> show (preco p)
-      <> ", validade = "
+      <> " | "
       <> show (validade p)
-      <> ", created_at = "
+      <> " | "
       <> show (created_at p)
-      <> ", updated_at = "
+      <> " | "
       <> show (updated_at p)
-      <> "}"
 
 instance FromRecord Produto
 
@@ -63,6 +76,20 @@ readStorage = do
   exists <- doesFileExist fileName
   unless exists $ BL.writeFile fileName ""
   BL.readFile fileName Data.Functor.<&> (fmap (V.toList . fmap (\(uid, nome, quantidade, preco, validade, created_at, updated_at) -> Produto uid nome quantidade preco validade created_at updated_at)) . decode NoHeader)
+
+verifyStorage :: [Produto] -> [Produto]
+verifyStorage [] = []
+verifyStorage produtos =
+  if read (quantidade (head produtos)) <= 0
+    then head produtos : verifyStorage (tail produtos)
+    else verifyStorage (tail produtos)
+
+-- verificaValidade :: Produto -> Bool
+-- verificaValidade =
+
+--verifyValidade :: [Produto] -> [Produto]
+--verifyValidade [] = []
+--verifyValidade produtos =
 
 writeStorage :: [Produto] -> IO ()
 writeStorage products = do
@@ -78,5 +105,5 @@ storageToProducts storage = do
         Right products -> products
   newStorage
 
-createProduct :: String -> String -> String -> String -> String -> String -> String -> Produto
+createProduct :: Int -> String -> String -> String -> String -> String -> String -> Produto
 createProduct = Produto
