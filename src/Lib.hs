@@ -15,6 +15,7 @@ import Storage
     updated_at,
     validade,
     verifyStorage,
+    verifyValidade,
   )
 
 menu :: IO ()
@@ -44,6 +45,7 @@ interpret "c" produtos = create produtos
 interpret "l" produtos = list produtos
 interpret "mq" produtos = updateQuantity produtos
 interpret "d" produtos = delete produtos
+interpret "v" produtos = filterByValidade produtos
 interpret "z" produtos = filterByQuantityZero produtos
 interpret "q" produtos = return ()
 interpret command produtos = do
@@ -61,8 +63,10 @@ create produtos = do
   preco <- getLine
   putStrLn "Digite a validade do produto (em meses): "
   validade <- getLine
-  --tempoAtual <- getCurrentTime
-  let product = createProduct uid name quantidade preco validade ("00/00/0000" :: String) ("00/00/0000" :: String)
+  
+  current <- getCurrentTime
+  let today = formatDate current
+  let product = createProduct uid name quantidade preco validade today today
   prompt (product : produtos)
 
 list :: [Produto] -> IO ()
@@ -120,9 +124,14 @@ filterByQuantityZero produtos = do
   print (verifyStorage produtos)
   prompt produtos
 
-{-filterByValidade :: [Produto] -> IO ()
+-- Filtra o estoque por produtos vencidos
+filterByValidade :: [Produto] -> IO ()
 filterByValidade produtos = do
+  c <- getCurrentTime 
   putStrLn ""
   putStrLn "uid | nome | quantidade | preco | validade | created_at | updated_at"
-  print (verifyValidade produtos)
-  prompt produtos-}
+  mapM_ print $ verifyValidade produtos (utctDay c)
+  prompt produtos
+
+formatDate :: UTCTime  -> String 
+formatDate = formatTime defaultTimeLocale  "%d/%m/%0Y" 
