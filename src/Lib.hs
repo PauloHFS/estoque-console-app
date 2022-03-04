@@ -55,7 +55,7 @@ interpret command produtos = do
 create :: [Produto] -> IO ()
 create produtos = do
   let uid = length produtos + 1
-  putStrLn "Digite o numero do produto: "
+  putStrLn "Digite o nome do produto: "
   name <- getLine
   putStrLn "Digite a quantidade do produto: "
   quantidade <- getLine
