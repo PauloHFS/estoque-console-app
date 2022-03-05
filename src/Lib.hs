@@ -11,16 +11,18 @@ import Storage
     nome,
     preco,
     quantidade,
+    readStorage,
     uid,
+    updateUid,
     updated_at,
     validade,
     verifyStorage,
     verifyValidade,
-    updateUid,
   )
 
 menu :: IO ()
 menu = do
+  readStorage
   putStrLn ""
   putStrLn "Estoque Console App - Haskell Edition"
   putStrLn ""
@@ -56,7 +58,7 @@ interpret command produtos = do
 
 create :: [Produto] -> IO ()
 create produtos = do
-  let uid = length produtos + 1
+  let uid = length produtos
   putStrLn "Digite o nome do produto: "
   name <- getLine
   putStrLn "Digite a quantidade do produto: "
@@ -65,7 +67,7 @@ create produtos = do
   preco <- getLine
   putStrLn "Digite a validade do produto (em meses): "
   validade <- getLine
-  
+
   current <- getCurrentTime
   let today = formatDate current
   let product = createProduct uid name quantidade preco validade today today
@@ -87,7 +89,7 @@ delete produtos = do
 
   --Update the Uid to avoid duplicates
   let produtos'' = updateUid produtos' (read uid)
-  
+
   prompt produtos''
 
 updateQuantity :: [Produto] -> IO ()
@@ -133,11 +135,11 @@ filterByQuantityZero produtos = do
 -- Filtra o estoque por produtos vencidos
 filterByValidade :: [Produto] -> IO ()
 filterByValidade produtos = do
-  c <- getCurrentTime 
+  c <- getCurrentTime
   putStrLn ""
   putStrLn "uid | nome | quantidade | preco | validade | created_at | updated_at"
   mapM_ print $ verifyValidade produtos (utctDay c)
   prompt produtos
 
-formatDate :: UTCTime  -> String 
-formatDate = formatTime defaultTimeLocale  "%d/%m/%0Y" 
+formatDate :: UTCTime -> String
+formatDate = formatTime defaultTimeLocale "%d/%m/%0Y"
