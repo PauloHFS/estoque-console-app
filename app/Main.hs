@@ -1,9 +1,6 @@
 module Main where
 
-import Lib (prompt)
+import Lib (menu)
 
 main :: IO ()
-main = do    
-    putStrLn "Commands:"
-    putStrLn "q          - Quit"
-    prompt
+main = menu
