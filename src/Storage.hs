@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-deferred-out-of-scope-variables #-}
 
@@ -6,7 +5,6 @@ module Storage
   ( Produto,
     readStorage,
     writeStorage,
-    storageToProducts,
     createProduct,
     verifyStorage,
     verifyValidade,
@@ -22,24 +20,34 @@ module Storage
 where
 
 import Control.Monad (unless)
-import qualified Data.ByteString.Lazy as BL
-import Data.Csv
-  ( FromRecord,
-    HasHeader (NoHeader),
-    ToRecord,
-    decode,
-    encode,
-  )
-import qualified Data.Functor
+import Data.List.Split
 import Data.Maybe (fromJust)
-import qualified Data.String as BL
-import Data.Text (Text)
 import Data.Time (Day, UTCTime (utctDay), addDays, addGregorianMonthsRollOver, defaultTimeLocale, diffDays, formatTime, getCurrentTime, parseTimeM)
-import Data.Vector (update)
-import qualified Data.Vector as V
-import GHC.Generics (Generic)
-import qualified GHC.Read as BL
-import System.Directory (doesFileExist)
+import GHC.Read (Read (readPrec))
+import System.Directory
+import System.IO
+
+readStorage :: IO [Produto]
+readStorage = do
+  let filename = "storage.csv"
+  exists <- doesFileExist filename
+  unless exists $ writeFile filename ""
+  storage <- openFile filename ReadMode
+  conteudo <- hGetContents storage
+  let linhas = lines conteudo
+  let produtos = map convertToProduto linhas
+  return produtos
+
+writeStorage :: [Produto] -> IO ()
+writeStorage produtos = do
+  let filename = "storage.csv"
+  exists <- doesFileExist filename
+  unless exists $ writeFile filename ""
+  storage <- openFile filename WriteMode
+  let linhas = map convertToString produtos
+  let conteudo = unlines linhas
+  hPutStr storage conteudo
+  hFlush storage
 
 data Produto = Produto
   { uid :: Int,
@@ -50,9 +58,8 @@ data Produto = Produto
     created_at :: String,
     updated_at :: String
   }
-  deriving (Generic, Eq)
+  deriving (Eq)
 
--- create a new instance of the Show class for Product
 instance Show Produto where
   show p =
     show (uid p)
@@ -69,17 +76,34 @@ instance Show Produto where
       <> " | "
       <> show (updated_at p)
 
-instance FromRecord Produto
+convertToProduto :: String -> Produto
+convertToProduto linha =
+  let [uid, nome, quantidade, preco, validade, created_at, updated_at] = splitOn "," linha
+   in Produto
+        { uid = read uid,
+          nome = read nome,
+          quantidade = read quantidade,
+          preco = read preco,
+          validade = read validade,
+          created_at = read created_at,
+          updated_at = read updated_at
+        }
 
-instance ToRecord Produto
-
--- read storage.csv file
-readStorage :: IO (Either String [Produto])
-readStorage = do
-  let fileName = "storage.csv"
-  exists <- doesFileExist fileName
-  unless exists $ BL.writeFile fileName ""
-  BL.readFile fileName Data.Functor.<&> (fmap (V.toList . fmap (\(uid, nome, quantidade, preco, validade, created_at, updated_at) -> Produto uid nome quantidade preco validade created_at updated_at)) . decode NoHeader)
+convertToString :: Produto -> String
+convertToString p =
+  show (uid p)
+    <> ","
+    <> show (nome p)
+    <> ","
+    <> show (quantidade p)
+    <> ","
+    <> show (preco p)
+    <> ","
+    <> show (validade p)
+    <> ","
+    <> show (created_at p)
+    <> ","
+    <> show (updated_at p)
 
 {-
   Separate the list of produtos into 2
@@ -103,6 +127,7 @@ updateUidAux produtos = do
 
   produto' : updateUidAux (tail produtos)
 
+-- Verifica os produtos que se esgotaram do estoque
 verifyStorage :: [Produto] -> [Produto]
 verifyStorage [] = []
 verifyStorage produtos =
@@ -123,20 +148,6 @@ verifyValidade produtos dia =
   if verifyValidadeProduto (head produtos) dia
     then head produtos : verifyValidade (tail produtos) dia
     else verifyValidade (tail produtos) dia
-
-writeStorage :: [Produto] -> IO ()
-writeStorage products = do
-  let fileName = "storage.csv"
-  exists <- doesFileExist fileName
-  unless exists $ BL.writeFile fileName ""
-  BL.writeFile fileName $ encode products
-
-storageToProducts :: Either String [Produto] -> [Produto]
-storageToProducts storage = do
-  let newStorage = case storage of
-        Left err -> []
-        Right products -> products
-  newStorage
 
 createProduct :: Int -> String -> String -> String -> String -> String -> String -> Produto
 createProduct = Produto
