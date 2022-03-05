@@ -6,7 +6,6 @@ where
 import Data.Time
 import Storage
   ( Produto,
-    createProduct,
     created_at,
     nome,
     preco,
