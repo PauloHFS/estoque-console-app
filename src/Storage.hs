@@ -138,7 +138,7 @@ verifyStorage produtos =
 
 -- Verifica a validade de um Produto em certa data. Retorna True se o produto estiver vencido
 verifyValidadeProduto :: Produto -> Day -> Bool
-verifyValidadeProduto produto dia = validade produto /= "" && diffDays dataValidade dia < 0
+verifyValidadeProduto produto dia = diffDays dataValidade dia <= 0
   where
     dataValidade = fromJust $ parseTimeM True defaultTimeLocale "%d/%m/%0Y" (validade produto)
 

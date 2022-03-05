@@ -36,7 +36,7 @@ menu = do
   putStrLn "mp      - Modifica o preço de um produto"
   putStrLn "d       - Remove um produto do inventário"
   putStrLn "v       - Verifica validade dos produtos"
-  putStrLn "ch      - Verifica validade de um Produto" 
+  putStrLn "ch      - Verifica validade de um Produto"
   putStrLn "z       - Verifica itens zerados"
   putStrLn "q       - Sair"
   prompt produtos
@@ -77,8 +77,9 @@ create produtos = do
 
   current <- getCurrentTime
   let today = formatDate current
-  let parsedValidade = parseTimeM True defaultTimeLocale "%d/%m/%0Y" validade :: Maybe Day
-  if isJust parsedValidade then do
+  
+  let isDateValid = maybe False (verifyVencido (utctDay current)) (parseDate validade)
+  if isDateValid then do
     let product = createProduct uid name quantidade preco validade today today
     writeStorage (produtos ++ [product])
     prompt (produtos ++ [product])
@@ -114,8 +115,8 @@ checaValidade produtos = do
 
   -- get a product by uid
   let produto = head (filter (\p -> getUid p == read uid) produtos)
-  
-  c <- getCurrentTime 
+
+  c <- getCurrentTime
   let invalid = verifyValidadeProduto produto $ utctDay c
   if invalid then
     print "Fora da Validade"
@@ -172,11 +173,21 @@ filterByQuantityZero produtos = do
 -- Filtra o estoque por produtos vencidos
 filterByValidade :: [Produto] -> IO ()
 filterByValidade produtos = do
-  c <- getCurrentTime 
+  c <- getCurrentTime
   putStrLn ""
   putStrLn "uid | nome | quantidade | preco | validade | created_at | updated_at"
   mapM_ print $ verifyValidadeEstoque produtos (utctDay c)
   prompt produtos
 
+
+--Mover para Util
 formatDate :: UTCTime -> String
 formatDate = formatTime defaultTimeLocale "%d/%m/%0Y"
+
+--Mover para Util
+verifyVencido :: Day -> Day -> Bool 
+verifyVencido currentDate userDate = diffDays userDate currentDate >= 0
+
+--Mover para Util
+parseDate :: String -> Maybe Day
+parseDate = parseTimeM True defaultTimeLocale "%d/%m/%0Y"
