@@ -6,21 +6,7 @@ where
 
 import Data.Time
 import Storage
-  ( Produto,
-    created_at,
-    nome,
-    preco,
-    quantidade,
-    readStorage,
-    uid,
-    updateUid,
-    updated_at,
-    validade,
-    verifyStorage,
-    verifyValidadeEstoque,
-    verifyValidadeProduto,
-    writeStorage,
-  )
+
 import Data.Maybe (isJust)
 import System.IO
 
