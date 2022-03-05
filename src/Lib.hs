@@ -6,6 +6,7 @@ where
 
 import Data.Time
 import Storage
+import Validate
 import System.IO
 
 menu :: IO ()
@@ -30,6 +31,7 @@ prompt produtos = do
   putStr "> "
   command <- getLine
   putStrLn ""
+  if validInputs [emptyInput command]
   interpret command produtos
 
 interpret :: String -> [Produto] -> IO ()
@@ -82,8 +84,8 @@ list produtos = do
 delete :: [Produto] -> IO ()
 delete produtos = do
   putStrLn "Digite o uid do produto: "
-  uid <- getLine
-  let produtos' = filter (\p -> getUid p /= read uid) produtos
+  uid' <- getLine
+  let produtos' = filter (\p -> uid p /= read uid') produtos
 
   --Update the Uid to avoid duplicates
   let produtos'' = updateUid produtos' (read uid)
@@ -100,7 +102,7 @@ updateQuantity produtos = do
   newQuantity <- getLine
 
   -- get a product by uid
-  let produto = head (filter (\p -> getUid p == read uid') produtos)
+  let produto = head (filter (\p -> uid p == read uid') produtos)
   let produtosL = filter (\p -> uid p < read uid') produtos
   let produtosR = filter (\p -> uid p > read uid') produtos
 
@@ -110,9 +112,6 @@ updateQuantity produtos = do
 
   prompt (produtosL ++ produto' : produtosR)
 
-getUid :: Produto -> Int
-getUid = uid
-
 updatePrice :: [Produto] -> IO ()
 updatePrice produtos = do
   putStrLn "Digite o uid do produto: "
@@ -121,7 +120,7 @@ updatePrice produtos = do
   newPrice <- getLine
 
   -- get a product by uid
-  let produto = head (filter (\p -> getUid p == read uid') produtos)
+  let produto = head (filter (\p -> uid p == read uid') produtos)
   let produtosL = filter (\p -> uid p < read uid') produtos
   let produtosR = filter (\p -> uid p > read uid') produtos
 
