@@ -90,9 +90,7 @@ updateUidAux produtos = do
 
   produto' : updateUidAux (tail produtos)
 
-{-
-Verifica os produtos que se esgotaram do estoque
--}
+-- Verifica os produtos que se esgotaram do estoque
 verifyStorage :: [Produto] -> [Produto]
 verifyStorage [] = []
 verifyStorage produtos =
@@ -100,25 +98,19 @@ verifyStorage produtos =
     then head produtos : verifyStorage (tail produtos)
     else verifyStorage (tail produtos)
 
-{-
-Verifica a validade de um Produto em certa data. 
-Retorna True se o produto estiver vencido
--}
+-- Verifica a validade de um Produto em certa data. Retorna True se o produto estiver vencido
 verifyValidadeProduto :: Produto -> Day -> Bool
-verifyValidadeProduto produto dia = diffDays dataValidade dia <= 0
+verifyValidadeProduto produto dia = read (validade produto) /= 0 && diffDays dataValidade dia < 0
   where
-    dataValidade = fromJust $ parseTimeM True defaultTimeLocale "%d/%m/%0Y" (validade produto)
+    dataValidade = addGregorianMonthsRollOver (read $ validade produto) $ fromJust $ parseTimeM True defaultTimeLocale "%d/%m/%0Y" (created_at produto)
 
-{- 
-Verifica a validade dos produtos em certa data. 
-Retorna uma lista de produtos vencidos.
--}
-verifyValidadeEstoque :: [Produto] -> Day -> [Produto]
-verifyValidadeEstoque [] dia = []
-verifyValidadeEstoque produtos dia =
+-- Verifica a validade dos produtos em certa data. Retorna uma lista de produtos vencidos.
+verifyValidade :: [Produto] -> Day -> [Produto]
+verifyValidade [] dia = []
+verifyValidade produtos dia =
   if verifyValidadeProduto (head produtos) dia
-    then head produtos : verifyValidadeEstoque (tail produtos) dia
-    else verifyValidadeEstoque (tail produtos) dia
+    then head produtos : verifyValidade (tail produtos) dia
+    else verifyValidade (tail produtos) dia
 
 convertToProduto :: String -> Produto
 convertToProduto linha =
