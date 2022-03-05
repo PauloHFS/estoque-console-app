@@ -128,7 +128,9 @@ updateUidAux produtos = do
 
   produto' : updateUidAux (tail produtos)
 
--- Verifica os produtos que se esgotaram do estoque
+{-
+Verifica os produtos que se esgotaram do estoque
+-}
 verifyStorage :: [Produto] -> [Produto]
 verifyStorage [] = []
 verifyStorage produtos =
@@ -136,13 +138,19 @@ verifyStorage produtos =
     then head produtos : verifyStorage (tail produtos)
     else verifyStorage (tail produtos)
 
--- Verifica a validade de um Produto em certa data. Retorna True se o produto estiver vencido
+{-
+Verifica a validade de um Produto em certa data. 
+Retorna True se o produto estiver vencido
+-}
 verifyValidadeProduto :: Produto -> Day -> Bool
 verifyValidadeProduto produto dia = diffDays dataValidade dia <= 0
   where
     dataValidade = fromJust $ parseTimeM True defaultTimeLocale "%d/%m/%0Y" (validade produto)
 
--- Verifica a validade dos produtos em certa data. Retorna uma lista de produtos vencidos.
+{- 
+Verifica a validade dos produtos em certa data. 
+Retorna uma lista de produtos vencidos.
+-}
 verifyValidadeEstoque :: [Produto] -> Day -> [Produto]
 verifyValidadeEstoque [] dia = []
 verifyValidadeEstoque produtos dia =

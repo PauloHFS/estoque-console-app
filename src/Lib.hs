@@ -36,7 +36,7 @@ menu = do
   putStrLn "mp      - Modifica o preço de um produto"
   putStrLn "d       - Remove um produto do inventário"
   putStrLn "v       - Verifica validade dos produtos"
-  putStrLn "ch      - Verifica validade de um Produto"
+  putStrLn "cv      - Verifica validade de um Produto"
   putStrLn "z       - Verifica itens zerados"
   putStrLn "q       - Sair"
   prompt produtos
@@ -113,8 +113,7 @@ checaValidade produtos = do
   putStrLn "Digite o uid do produto: "
   uid <- getLine
 
-  -- get a product by uid
-  let produto = head (filter (\p -> getUid p == read uid) produtos)
+  let produto = head (filter (\p -> getUid p == read uid) produtos) -- get a product by uid
 
   c <- getCurrentTime
   let invalid = verifyValidadeProduto produto $ utctDay c
@@ -170,7 +169,9 @@ filterByQuantityZero produtos = do
   print (verifyStorage produtos)
   prompt produtos
 
--- Filtra o estoque por produtos vencidos
+{-
+Filtra o estoque por produtos vencidos
+-}
 filterByValidade :: [Produto] -> IO ()
 filterByValidade produtos = do
   c <- getCurrentTime
