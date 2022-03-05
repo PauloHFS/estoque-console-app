@@ -1,6 +1,6 @@
 name: estoque-console-app
 version: 0.1.0.0
-github: 'githubuser/estoque-console-app'
+github: 'PauloHFS/estoque-console-app'
 license: BSD3
 author: 'Author name here'
 maintainer: 'example@example.com'
@@ -21,6 +21,7 @@ description: Please see the README on GitHub at <https://github.com/githubuser/e
 
 dependencies:
   - base >= 4.7 && < 5
+  - hlint >= 1.9.1
   - cassava >= 0.5.2.0
   - bytestring >=0.10.12.0
   - vector >= 0.12.3.1
