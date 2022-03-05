@@ -32,7 +32,10 @@ prompt produtos = do
   command <- getLine
   putStrLn ""
   if validInputs [emptyInput command]
-  interpret command produtos
+    then interpret command produtos
+    else do
+      print "Entrada inválida"
+      prompt produtos
 
 interpret :: String -> [Produto] -> IO ()
 interpret "c" produtos = create produtos
