@@ -47,7 +47,7 @@ interpret "q" produtos = do
   writeStorage produtos
   return ()
 interpret command produtos = do
-  putStrLn ("Invalid command: `" ++ command ++ "`")
+  putStrLn ("Comando inválido: `" ++ command ++ "`")
   prompt produtos
 
 create :: [Produto] -> IO ()
@@ -56,9 +56,11 @@ create produtos = do
   putStrLn "Digite o nome do produto: "
   name <- getLine
   putStrLn "Digite a quantidade do produto: "
-  quantidade <- getLine
-  putStrLn "Digite o preco do produto: "
-  preco <- getLine
+  inputQuantidade <- getLine
+  let quantidade = read inputQuantidade :: Int
+  putStrLn "Digite o preço do produto: "
+  inputPreco <- getLine 
+  let preco = read inputPreco :: Double
   putStrLn "Digite a validade do produto (em meses): "
   validade <- getLine
 
@@ -97,7 +99,8 @@ updateQuantity produtos = do
   putStrLn "Digite o uid do produto: "
   uid' <- getLine
   putStrLn "Digite a nova quantidade: "
-  newQuantity <- getLine
+  inputNewQuantity <- getLine
+  let newQuantity = read inputNewQuantity :: Int
 
   -- get a product by uid
   let produto = head (filter (\p -> getUid p == read uid') produtos)
@@ -118,7 +121,8 @@ updatePrice produtos = do
   putStrLn "Digite o uid do produto: "
   uid' <- getLine
   putStrLn "Digite o novo preço: "
-  newPrice <- getLine
+  inputNewPrice <- getLine
+  let newPrice = read inputNewPrice :: Double
 
   -- get a product by uid
   let produto = head (filter (\p -> getUid p == read uid') produtos)

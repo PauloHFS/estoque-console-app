@@ -44,8 +44,8 @@ writeStorage produtos = do
 data Produto = Produto
   { uid :: Int,
     nome :: String,
-    quantidade :: String,
-    preco :: String,
+    quantidade :: Int,
+    preco :: Double,
     validade :: String,
     created_at :: String,
     updated_at :: String
@@ -94,7 +94,7 @@ updateUidAux produtos = do
 verifyStorage :: [Produto] -> [Produto]
 verifyStorage [] = []
 verifyStorage produtos =
-  if read (quantidade (head produtos)) <= 0
+  if quantidade (head produtos) <= 0
     then head produtos : verifyStorage (tail produtos)
     else verifyStorage (tail produtos)
 
