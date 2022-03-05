@@ -72,7 +72,7 @@ create produtos = do
   quantidade <- getLine
   putStrLn "Digite o preco do produto: "
   preco <- getLine
-  putStrLn "Digite a validade do produto (em meses): "
+  putStrLn "Digite a validade do produto (no formato DD/MM/YYYY): "
   validade <- getLine
 
   current <- getCurrentTime
