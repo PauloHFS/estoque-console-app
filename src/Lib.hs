@@ -44,6 +44,7 @@ interpret :: String -> [Produto] -> IO ()
 interpret "c" produtos = create produtos
 interpret "l" produtos = list produtos
 interpret "mq" produtos = updateQuantity produtos
+interpret "mp" produtos = updatePrice produtos
 interpret "d" produtos = delete produtos
 interpret "v" produtos = filterByValidade produtos
 interpret "z" produtos = filterByQuantityZero produtos
