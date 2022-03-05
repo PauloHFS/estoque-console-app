@@ -52,7 +52,9 @@ interpret "mp" produtos = updatePrice produtos
 interpret "d" produtos = delete produtos
 interpret "v" produtos = filterByValidade produtos
 interpret "z" produtos = filterByQuantityZero produtos
-interpret "q" produtos = return ()
+interpret "q" produtos = do
+  writeStorage produtos
+  return ()
 interpret command produtos = do
   putStrLn ("Invalid command: `" ++ command ++ "`")
   prompt produtos
@@ -72,8 +74,8 @@ create produtos = do
   current <- getCurrentTime
   let today = formatDate current
   let product = createProduct uid name quantidade preco validade today today
-  writeStorage (product : produtos)
-  prompt (product : produtos)
+  writeStorage (produtos ++ [product])
+  prompt (produtos ++ [product])
 
 list :: [Produto] -> IO ()
 list produtos = do
@@ -92,22 +94,27 @@ delete produtos = do
   --Update the Uid to avoid duplicates
   let produtos'' = updateUid produtos' (read uid)
 
+  writeStorage produtos''
+
   prompt produtos''
 
 updateQuantity :: [Produto] -> IO ()
 updateQuantity produtos = do
   putStrLn "Digite o uid do produto: "
-  uid <- getLine
+  uid' <- getLine
   putStrLn "Digite a nova quantidade: "
   newQuantity <- getLine
 
   -- get a product by uid
-  let produto = head (filter (\p -> getUid p == read uid) produtos)
-  let produtos' = filter (\p -> getUid p /= read uid) produtos
+  let produto = head (filter (\p -> getUid p == read uid') produtos)
+  let produtosL = filter (\p -> uid p < read uid') produtos
+  let produtosR = filter (\p -> uid p > read uid') produtos
 
-  let produto' = createProduct (read uid) (nome produto) newQuantity (preco produto) (validade produto) (created_at produto) (updated_at produto)
+  let produto' = createProduct (read uid') (nome produto) newQuantity (preco produto) (validade produto) (created_at produto) (updated_at produto)
 
-  prompt (produto' : produtos')
+  writeStorage (produtosL ++ produto' : produtosR)
+
+  prompt (produtosL ++ produto' : produtosR)
 
 getUid :: Produto -> Int
 getUid = uid
@@ -115,17 +122,20 @@ getUid = uid
 updatePrice :: [Produto] -> IO ()
 updatePrice produtos = do
   putStrLn "Digite o uid do produto: "
-  uid <- getLine
+  uid' <- getLine
   putStrLn "Digite o novo preço: "
   newPrice <- getLine
 
   -- get a product by uid
-  let produto = head (filter (\p -> getUid p == read uid) produtos)
-  let produtos' = filter (\p -> getUid p /= read uid) produtos
+  let produto = head (filter (\p -> getUid p == read uid') produtos)
+  let produtosL = filter (\p -> uid p < read uid') produtos
+  let produtosR = filter (\p -> uid p > read uid') produtos
 
-  let produto' = createProduct (read uid) (nome produto) (quantidade produto) newPrice (validade produto) (created_at produto) (updated_at produto)
+  let produto' = createProduct (read uid') (nome produto) (quantidade produto) newPrice (validade produto) (created_at produto) (updated_at produto)
 
-  prompt (produto' : produtos')
+  writeStorage (produtosL ++ produto' : produtosR)
+
+  prompt (produtosL ++ produto' : produtosR)
 
 filterByQuantityZero :: [Produto] -> IO ()
 filterByQuantityZero produtos = do

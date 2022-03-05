@@ -19,6 +19,7 @@ module Storage
   )
 where
 
+import Control.Monad (unless)
 import Data.List.Split
 import Data.Maybe (fromJust)
 import Data.Time (Day, UTCTime (utctDay), addDays, addGregorianMonthsRollOver, defaultTimeLocale, diffDays, formatTime, getCurrentTime, parseTimeM)
@@ -28,7 +29,10 @@ import System.IO
 
 readStorage :: IO [Produto]
 readStorage = do
-  storage <- openFile "storage.csv" ReadMode
+  let filename = "storage.csv"
+  exists <- doesFileExist filename
+  unless exists $ writeFile filename ""
+  storage <- openFile filename ReadMode
   conteudo <- hGetContents storage
   let linhas = lines conteudo
   let produtos = map convertToProduto linhas
@@ -36,7 +40,10 @@ readStorage = do
 
 writeStorage :: [Produto] -> IO ()
 writeStorage produtos = do
-  storage <- openFile "storage.csv" WriteMode
+  let filename = "storage.csv"
+  exists <- doesFileExist filename
+  unless exists $ writeFile filename ""
+  storage <- openFile filename WriteMode
   let linhas = map convertToString produtos
   let conteudo = unlines linhas
   hPutStr storage conteudo
