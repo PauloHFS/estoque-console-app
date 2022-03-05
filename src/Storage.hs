@@ -17,6 +17,7 @@ module Storage
     validade,
     created_at,
     updated_at,
+    updateUid,
   )
 where
 
@@ -79,6 +80,27 @@ readStorage = do
   exists <- doesFileExist fileName
   unless exists $ BL.writeFile fileName ""
   BL.readFile fileName Data.Functor.<&> (fmap (V.toList . fmap (\(uid, nome, quantidade, preco, validade, created_at, updated_at) -> Produto uid nome quantidade preco validade created_at updated_at)) . decode NoHeader)
+
+{-
+  Separate the list of produtos into 2
+  Left - doenst need change in the Uid
+  Right - need change in the Uid
+-}
+updateUid :: [Produto] -> Int -> IO ()
+updateUid produtos oldUid = do
+  let produtosL = filter (\p -> getUid p < oldUid) produtos
+  let produtosR = filter (\p -> getUid p > oldUid) produtos 
+
+  produtosL : updateUidAux produtosR
+  
+--Recursively changes the Uid of the products
+updateUidAux :: [Produto] -> [Produto]
+updateUidAux [] = []
+updateUidAux produtos = 
+  let produto = head produtos
+  let produto' = createProduct ((read uid) - 1) (nome produto) (quantidade produto) (preco produto) (validade produto) (created_at produto) (updated_at produto) 
+  
+  produto' : updateUidAux (tail produtos)
 
 verifyStorage :: [Produto] -> [Produto]
 verifyStorage [] = []

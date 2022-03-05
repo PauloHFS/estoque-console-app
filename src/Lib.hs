@@ -16,6 +16,7 @@ import Storage
     validade,
     verifyStorage,
     verifyValidade,
+    updateUid,
   )
 
 menu :: IO ()
@@ -83,7 +84,11 @@ delete produtos = do
   putStrLn "Digite o uid do produto: "
   uid <- getLine
   let produtos' = filter (\p -> getUid p /= read uid) produtos
-  prompt produtos'
+
+  --Update the Uid to avoid duplicates
+  let produtos'' = updateUid produtos' (read uid)
+  
+  prompt produtos''
 
 updateQuantity :: [Produto] -> IO ()
 updateQuantity produtos = do
