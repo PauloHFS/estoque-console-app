@@ -4,7 +4,7 @@
 module Storage
   ( Produto,
     readStorage,
-    -- writeStorage,
+    writeStorage,
     createProduct,
     verifyStorage,
     verifyValidade,
@@ -34,11 +34,13 @@ readStorage = do
   let produtos = map convertToProduto linhas
   print produtos
 
-{- writeStorage :: [Produto] -> IO ()
+writeStorage :: [Produto] -> IO ()
 writeStorage produtos = do
   storage <- openFile "storage.csv" WriteMode
-  hPutStr storage "Abc"
-  hFlush storage -}
+  let linhas = map convertToString produtos
+  let conteudo = unlines linhas
+  hPutStr storage conteudo
+  hFlush storage
 
 data Produto = Produto
   { uid :: Int,
@@ -79,6 +81,22 @@ convertToProduto linha =
           created_at = created_at,
           updated_at = updated_at
         }
+
+convertToString :: Produto -> String
+convertToString p =
+  show (uid p)
+    <> ","
+    <> show (nome p)
+    <> ","
+    <> show (quantidade p)
+    <> ","
+    <> show (preco p)
+    <> ","
+    <> show (validade p)
+    <> ","
+    <> show (created_at p)
+    <> ","
+    <> show (updated_at p)
 
 {-
   Separate the list of produtos into 2

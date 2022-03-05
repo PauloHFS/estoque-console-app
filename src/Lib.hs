@@ -18,6 +18,7 @@ import Storage
     validade,
     verifyStorage,
     verifyValidade,
+    writeStorage,
   )
 
 menu :: IO ()
@@ -71,6 +72,7 @@ create produtos = do
   current <- getCurrentTime
   let today = formatDate current
   let product = createProduct uid name quantidade preco validade today today
+  writeStorage (product : produtos)
   prompt (product : produtos)
 
 list :: [Produto] -> IO ()
