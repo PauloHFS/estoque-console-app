@@ -6,6 +6,7 @@ where
 
 import Data.Time
 import Storage
+import Data.Maybe (isJust)
 import System.IO
 import Validate
 
