@@ -1,32 +1,17 @@
 module Lib
   ( menu,
+    prompt,
   )
 where
 
 import Data.Time
 import Storage
-  ( Produto,
-    createProduct,
-    created_at,
-    nome,
-    preco,
-    quantidade,
-    readStorage,
-    uid,
-    updateUid,
-    updated_at,
-    validade,
-    verifyStorage,
-    verifyValidade,
-    writeStorage,
-  )
+import System.IO
 
 menu :: IO ()
 menu = do
-  produtos <- readStorage
-  putStrLn ""
   putStrLn "Estoque Console App - Haskell Edition"
-  putStrLn ""
+
   putStrLn "Comandos:"
   putStrLn "c       - Adiciona um novo produto ao inventário"
   putStrLn "l       - Lista todos os produtos do inventário"
@@ -35,13 +20,16 @@ menu = do
   putStrLn "d       - Remove um produto do inventário"
   putStrLn "v       - Verifica validade dos produtos"
   putStrLn "z       - Verifica itens zerados"
+  putStrLn "h       - Mostrar comandos"
   putStrLn "q       - Sair"
-  prompt produtos
 
 prompt :: [Produto] -> IO ()
 prompt produtos = do
-  putStrLn "> "
+  hSetBuffering stdout NoBuffering
+  putStrLn ""
+  putStr "> "
   command <- getLine
+  putStrLn ""
   interpret command produtos
 
 interpret :: String -> [Produto] -> IO ()
@@ -52,6 +40,9 @@ interpret "mp" produtos = updatePrice produtos
 interpret "d" produtos = delete produtos
 interpret "v" produtos = filterByValidade produtos
 interpret "z" produtos = filterByQuantityZero produtos
+interpret "h" produtos = do
+  menu
+  prompt produtos
 interpret "q" produtos = do
   writeStorage produtos
   return ()
@@ -73,16 +64,19 @@ create produtos = do
 
   current <- getCurrentTime
   let today = formatDate current
-  let product = createProduct uid name quantidade preco validade today today
+  let product = Produto uid name quantidade preco validade today today
   writeStorage (produtos ++ [product])
+
   prompt (produtos ++ [product])
 
 list :: [Produto] -> IO ()
 list produtos = do
-  putStrLn ""
-  putStrLn "uid | nome | quantidade | preco | validade | created_at | updated_at"
-  mapM_ print produtos
-  putStrLn ""
+  if null produtos
+    then putStrLn "Nenhum produto cadastrado"
+    else do
+      putStrLn "uid | nome | quantidade | preco | validade | created_at | updated_at"
+      mapM_ print produtos
+
   prompt produtos
 
 delete :: [Produto] -> IO ()
@@ -110,7 +104,7 @@ updateQuantity produtos = do
   let produtosL = filter (\p -> uid p < read uid') produtos
   let produtosR = filter (\p -> uid p > read uid') produtos
 
-  let produto' = createProduct (read uid') (nome produto) newQuantity (preco produto) (validade produto) (created_at produto) (updated_at produto)
+  let produto' = Produto (read uid') (nome produto) newQuantity (preco produto) (validade produto) (created_at produto) (updated_at produto)
 
   writeStorage (produtosL ++ produto' : produtosR)
 
@@ -131,7 +125,7 @@ updatePrice produtos = do
   let produtosL = filter (\p -> uid p < read uid') produtos
   let produtosR = filter (\p -> uid p > read uid') produtos
 
-  let produto' = createProduct (read uid') (nome produto) (quantidade produto) newPrice (validade produto) (created_at produto) (updated_at produto)
+  let produto' = Produto (read uid') (nome produto) (quantidade produto) newPrice (validade produto) (created_at produto) (updated_at produto)
 
   writeStorage (produtosL ++ produto' : produtosR)
 
@@ -139,18 +133,25 @@ updatePrice produtos = do
 
 filterByQuantityZero :: [Produto] -> IO ()
 filterByQuantityZero produtos = do
-  putStrLn ""
-  putStrLn "uid | nome | quantidade | preco | validade | created_at | updated_at"
-  print (verifyStorage produtos)
+  let produtos' = verifyStorage produtos
+  if null produtos'
+    then putStrLn "Nenhum produto com quantidade igual a 0"
+    else do
+      putStrLn "uid | nome | quantidade | preco | validade | created_at | updated_at"
+      mapM_ print produtos'
   prompt produtos
 
 -- Filtra o estoque por produtos vencidos
 filterByValidade :: [Produto] -> IO ()
 filterByValidade produtos = do
   c <- getCurrentTime
-  putStrLn ""
-  putStrLn "uid | nome | quantidade | preco | validade | created_at | updated_at"
-  mapM_ print $ verifyValidade produtos (utctDay c)
+  let produtos' = verifyValidade produtos (utctDay c)
+  if null produtos'
+    then putStrLn "Nenhum produto vencido"
+    else do
+      putStrLn "uid | nome | quantidade | preco | validade | created_at | updated_at"
+      mapM_ print produtos'
+
   prompt produtos
 
 formatDate :: UTCTime -> String
