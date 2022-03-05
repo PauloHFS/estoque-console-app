@@ -27,7 +27,16 @@ import System.IO
 
 menu :: IO ()
 menu = do
-  putStrLn "Estoque Console App - Haskell Edition"
+  putStrLn""
+  putStrLn "███████╗███╗   ███╗ █████╗ ██████╗ ████████╗    ███╗   ███╗ ██████╗ ███╗   ███╗████████╗"
+  putStrLn "██╔════╝████╗ ████║██╔══██╗██╔══██╗╚══██╔══╝    ████╗ ████║██╔════╝ ████╗ ████║╚══██╔══╝"
+  putStrLn "███████╗██╔████╔██║███████║██████╔╝   ██║       ██╔████╔██║██║  ███╗██╔████╔██║   ██║   "
+  putStrLn "╚════██║██║╚██╔╝██║██╔══██║██╔══██╗   ██║       ██║╚██╔╝██║██║   ██║██║╚██╔╝██║   ██║   "
+  putStrLn "███████║██║ ╚═╝ ██║██║  ██║██║  ██║   ██║       ██║ ╚═╝ ██║╚██████╔╝██║ ╚═╝ ██║   ██║   "
+  putStrLn "╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝       ╚═╝     ╚═╝ ╚═════╝ ╚═╝     ╚═╝   ╚═╝   "
+  putStrLn "\n"
+  putStrLn "\t\t\tGERENCIAMENTO DE ESTOQUE RÁPIDO E SIMPLES"
+  putStrLn "\n"
 
   putStrLn "Comandos:"
   putStrLn "c       - Adiciona um novo produto ao inventário"
