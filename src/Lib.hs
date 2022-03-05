@@ -17,9 +17,11 @@ import Storage
     updated_at,
     validade,
     verifyStorage,
-    verifyValidade,
+    verifyValidadeEstoque,
+    verifyValidadeProduto,
     writeStorage,
   )
+import Data.Maybe (isJust)
 
 menu :: IO ()
 menu = do
@@ -34,6 +36,7 @@ menu = do
   putStrLn "mp      - Modifica o preço de um produto"
   putStrLn "d       - Remove um produto do inventário"
   putStrLn "v       - Verifica validade dos produtos"
+  putStrLn "ch      - Verifica validade de um Produto" 
   putStrLn "z       - Verifica itens zerados"
   putStrLn "q       - Sair"
   prompt produtos
@@ -51,6 +54,7 @@ interpret "mq" produtos = updateQuantity produtos
 interpret "mp" produtos = updatePrice produtos
 interpret "d" produtos = delete produtos
 interpret "v" produtos = filterByValidade produtos
+interpret "cv" produtos = checaValidade produtos
 interpret "z" produtos = filterByQuantityZero produtos
 interpret "q" produtos = do
   writeStorage produtos
@@ -73,9 +77,14 @@ create produtos = do
 
   current <- getCurrentTime
   let today = formatDate current
-  let product = createProduct uid name quantidade preco validade today today
-  writeStorage (produtos ++ [product])
-  prompt (produtos ++ [product])
+  let parsedValidade = parseTimeM True defaultTimeLocale "%d/%m/%0Y" validade :: Maybe Day
+  if isJust parsedValidade then do
+    let product = createProduct uid name quantidade preco validade today today
+    writeStorage (produtos ++ [product])
+    prompt (produtos ++ [product])
+  else do
+    putStrLn "Data Inválida"
+    prompt produtos
 
 list :: [Produto] -> IO ()
 list produtos = do
@@ -97,6 +106,22 @@ delete produtos = do
   writeStorage produtos''
 
   prompt produtos''
+
+checaValidade :: [Produto] -> IO()
+checaValidade produtos = do
+  putStrLn "Digite o uid do produto: "
+  uid <- getLine
+
+  -- get a product by uid
+  let produto = head (filter (\p -> getUid p == read uid) produtos)
+  
+  c <- getCurrentTime 
+  let invalid = verifyValidadeProduto produto $ utctDay c
+  if invalid then
+    print "Fora da Validade"
+  else
+    print "Dentro da Validade"
+  prompt produtos
 
 updateQuantity :: [Produto] -> IO ()
 updateQuantity produtos = do
@@ -147,10 +172,10 @@ filterByQuantityZero produtos = do
 -- Filtra o estoque por produtos vencidos
 filterByValidade :: [Produto] -> IO ()
 filterByValidade produtos = do
-  c <- getCurrentTime
+  c <- getCurrentTime 
   putStrLn ""
   putStrLn "uid | nome | quantidade | preco | validade | created_at | updated_at"
-  mapM_ print $ verifyValidade produtos (utctDay c)
+  mapM_ print $ verifyValidadeEstoque produtos (utctDay c)
   prompt produtos
 
 formatDate :: UTCTime -> String

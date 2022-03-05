@@ -7,7 +7,8 @@ module Storage
     writeStorage,
     createProduct,
     verifyStorage,
-    verifyValidade,
+    verifyValidadeEstoque,
+    verifyValidadeProduto,
     uid,
     nome,
     quantidade,
@@ -137,17 +138,17 @@ verifyStorage produtos =
 
 -- Verifica a validade de um Produto em certa data. Retorna True se o produto estiver vencido
 verifyValidadeProduto :: Produto -> Day -> Bool
-verifyValidadeProduto produto dia = read (validade produto) /= 0 && diffDays dataValidade dia < 0
+verifyValidadeProduto produto dia = validade produto /= "" && diffDays dataValidade dia < 0
   where
-    dataValidade = addGregorianMonthsRollOver (read $ validade produto) $ fromJust $ parseTimeM True defaultTimeLocale "%d/%m/%0Y" (created_at produto)
+    dataValidade = fromJust $ parseTimeM True defaultTimeLocale "%d/%m/%0Y" (validade produto)
 
 -- Verifica a validade dos produtos em certa data. Retorna uma lista de produtos vencidos.
-verifyValidade :: [Produto] -> Day -> [Produto]
-verifyValidade [] dia = []
-verifyValidade produtos dia =
+verifyValidadeEstoque :: [Produto] -> Day -> [Produto]
+verifyValidadeEstoque [] dia = []
+verifyValidadeEstoque produtos dia =
   if verifyValidadeProduto (head produtos) dia
-    then head produtos : verifyValidade (tail produtos) dia
-    else verifyValidade (tail produtos) dia
+    then head produtos : verifyValidadeEstoque (tail produtos) dia
+    else verifyValidadeEstoque (tail produtos) dia
 
 createProduct :: Int -> String -> String -> String -> String -> String -> String -> Produto
 createProduct = Produto
