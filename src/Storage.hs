@@ -26,13 +26,13 @@ import GHC.Read (Read (readPrec))
 import System.Directory
 import System.IO
 
-readStorage :: IO ()
+readStorage :: IO [Produto]
 readStorage = do
   storage <- openFile "storage.csv" ReadMode
   conteudo <- hGetContents storage
   let linhas = lines conteudo
   let produtos = map convertToProduto linhas
-  print produtos
+  return produtos
 
 writeStorage :: [Produto] -> IO ()
 writeStorage produtos = do
@@ -74,12 +74,12 @@ convertToProduto linha =
   let [uid, nome, quantidade, preco, validade, created_at, updated_at] = splitOn "," linha
    in Produto
         { uid = read uid,
-          nome = nome,
-          quantidade = quantidade,
-          preco = preco,
-          validade = validade,
-          created_at = created_at,
-          updated_at = updated_at
+          nome = read nome,
+          quantidade = read quantidade,
+          preco = read preco,
+          validade = read validade,
+          created_at = read created_at,
+          updated_at = read updated_at
         }
 
 convertToString :: Produto -> String

@@ -23,7 +23,7 @@ import Storage
 
 menu :: IO ()
 menu = do
-  readStorage
+  produtos <- readStorage
   putStrLn ""
   putStrLn "Estoque Console App - Haskell Edition"
   putStrLn ""
@@ -36,7 +36,7 @@ menu = do
   putStrLn "v       - Verifica validade dos produtos"
   putStrLn "z       - Verifica itens zerados"
   putStrLn "q       - Sair"
-  prompt []
+  prompt produtos
 
 prompt :: [Produto] -> IO ()
 prompt produtos = do
