@@ -1,23 +1,23 @@
 module Validate where
 
-emptyInput :: String -> Bool
-emptyInput input = input == "" 
+import Data.Char (isDigit)
+import Data.List (find)
+import Storage (Produto)
 
-negativeQuantity :: Int -> Bool
-negativeQuantity quantity =  not (quantity < 0)
+isEmptyInput :: String -> Bool
+isEmptyInput = (== "")
 
-negativePrice :: Int -> Bool
-negativePrice price = not (price <= 0)
+isValidQuantity :: Int -> Bool
+isValidQuantity = (>= 0)
 
-notNumber :: String -> Bool
-notNumber input = 
-    result <- try (read input) :: (Either SomeException Int)
-    case result of 
-        Left False
-        Right True
+isValidPrice :: Int -> Bool
+isValidPrice = (> 0)
 
-validUid :: [Produto] -> Int -> Bool
-validUid produtos uid = uid > 0 && uid < length produtos
+isNumber :: String -> Bool
+isNumber = all isDigit
 
-validInputs :: [Bool] -> Bool
-validInputs inputs = (filter (\i -> i == False) input) == []
+isValidUid :: Int -> Int -> Bool
+isValidUid tamanho uid = uid > 0 && uid < tamanho - 1
+
+hasInvalidInputs :: [Bool] -> Bool
+hasInvalidInputs = elem False
