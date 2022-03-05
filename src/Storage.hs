@@ -4,12 +4,18 @@
 module Storage where
 
 import Control.Monad (unless)
-import Data.List.Split
+import Data.List.Split (splitOn)
 import Data.Maybe (fromJust)
 import Data.Time (Day, UTCTime (utctDay), addDays, addGregorianMonthsRollOver, defaultTimeLocale, diffDays, formatTime, getCurrentTime, parseTimeM)
 import GHC.Read (Read (readPrec))
-import System.Directory
+import System.Directory (doesFileExist)
 import System.IO
+  ( IOMode (ReadMode, WriteMode),
+    hFlush,
+    hGetContents,
+    hPutStr,
+    openFile,
+  )
 
 readStorage :: IO [Produto]
 readStorage = do
