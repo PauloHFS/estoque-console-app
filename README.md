@@ -37,3 +37,9 @@ Manter o controle do estoque da conveniência, permitindo à gerência total con
     
 2. **Estrutura dos dados:**<br>
   Neste App os dados serão salvos em formato csv, permitindo a qualquer momento sua importação em softwares de análise mais complexos.
+
+## Para o rodar o projeto:
+
+```bash
+stack run
+```
