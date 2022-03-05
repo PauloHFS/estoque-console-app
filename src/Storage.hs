@@ -31,15 +31,15 @@ import Data.Csv
     encode,
   )
 import qualified Data.Functor
+import Data.Maybe (fromJust)
 import qualified Data.String as BL
 import Data.Text (Text)
+import Data.Time (Day, UTCTime (utctDay), addDays, addGregorianMonthsRollOver, defaultTimeLocale, diffDays, formatTime, getCurrentTime, parseTimeM)
 import Data.Vector (update)
 import qualified Data.Vector as V
 import GHC.Generics (Generic)
 import qualified GHC.Read as BL
 import System.Directory (doesFileExist)
-import Data.Time (diffDays, getCurrentTime, defaultTimeLocale, UTCTime (utctDay), Day, formatTime, parseTimeM, addDays, addGregorianMonthsRollOver)
-import Data.Maybe (fromJust)
 
 data Produto = Produto
   { uid :: Int,
@@ -86,20 +86,21 @@ readStorage = do
   Left - doenst need change in the Uid
   Right - need change in the Uid
 -}
-updateUid :: [Produto] -> Int -> IO ()
+updateUid :: [Produto] -> Int -> [Produto]
+updateUid [] oldUid = []
 updateUid produtos oldUid = do
-  let produtosL = filter (\p -> getUid p < oldUid) produtos
-  let produtosR = filter (\p -> getUid p > oldUid) produtos 
+  let produtosL = filter (\p -> uid p < oldUid) produtos
+  let produtosR = filter (\p -> uid p > oldUid) produtos
 
-  produtosL : updateUidAux produtosR
-  
+  produtosL ++ updateUidAux produtosR
+
 --Recursively changes the Uid of the products
 updateUidAux :: [Produto] -> [Produto]
 updateUidAux [] = []
-updateUidAux produtos = 
+updateUidAux produtos = do
   let produto = head produtos
-  let produto' = createProduct ((read uid) - 1) (nome produto) (quantidade produto) (preco produto) (validade produto) (created_at produto) (updated_at produto) 
-  
+  let produto' = createProduct (uid produto - 1) (nome produto) (quantidade produto) (preco produto) (validade produto) (created_at produto) (updated_at produto)
+
   produto' : updateUidAux (tail produtos)
 
 verifyStorage :: [Produto] -> [Produto]
@@ -112,7 +113,8 @@ verifyStorage produtos =
 -- Verifica a validade de um Produto em certa data. Retorna True se o produto estiver vencido
 verifyValidadeProduto :: Produto -> Day -> Bool
 verifyValidadeProduto produto dia = read (validade produto) /= 0 && diffDays dataValidade dia < 0
-  where dataValidade = addGregorianMonthsRollOver (read $ validade produto) $ fromJust $ parseTimeM True defaultTimeLocale  "%d/%m/%0Y" (created_at produto)
+  where
+    dataValidade = addGregorianMonthsRollOver (read $ validade produto) $ fromJust $ parseTimeM True defaultTimeLocale "%d/%m/%0Y" (created_at produto)
 
 -- Verifica a validade dos produtos em certa data. Retorna uma lista de produtos vencidos.
 verifyValidade :: [Produto] -> Day -> [Produto]
