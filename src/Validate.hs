@@ -18,6 +18,3 @@ isNumber = all isDigit
 
 isValidUid :: Int -> Int -> Bool
 isValidUid tamanho uid = uid >= 0 && uid < tamanho
-
-hasInvalidInputs :: [Bool] -> Bool
-hasInvalidInputs = elem False
