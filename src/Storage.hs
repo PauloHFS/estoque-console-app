@@ -20,32 +20,34 @@ import System.IO
 readStorage :: IO [Produto]
 readStorage = do
   let filename = "storage.csv"
-
   exists <- doesFileExist filename
-  unless exists $ writeFile filename ""
+  if exists
+    then do
+      -- storage <- openFile filename ReadMode
+      -- conteudo <- hGetContents storage
+      storage <- readFile filename
 
-  storage <- openFile filename ReadMode
-  conteudo <- hGetContents storage
+      let linhas = lines storage
+      let produtos = map convertToProduto linhas
 
-  let linhas = lines conteudo
-  let produtos = map convertToProduto linhas
-
-  return produtos
+      return produtos
+    else do
+      writeFile filename ""
+      return []
 
 writeStorage :: [Produto] -> IO ()
 writeStorage produtos = do
   let filename = "storage.csv"
 
-  exists <- doesFileExist filename
-  unless exists $ writeFile filename ""
-
-  storage <- openFile filename WriteMode
+  -- storage <- openFile filename WriteMode
 
   let linhas = map convertToString produtos
   let conteudo = unlines linhas
 
-  hPutStr storage conteudo
-  hFlush storage
+  writeFile filename conteudo
+
+-- hPutStr storage conteudo
+-- hFlush storage
 
 data Produto = Produto
   { uid :: Int,

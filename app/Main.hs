@@ -7,4 +7,6 @@ main :: IO ()
 main = do
   produtos <- readStorage
   menu
+  putStr "Total de produtos carregados: "
+  print (length produtos)
   prompt produtos
