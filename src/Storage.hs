@@ -4,12 +4,18 @@
 module Storage where
 
 import Control.Monad (unless)
-import Data.List.Split
+import Data.List.Split (splitOn)
 import Data.Maybe (fromJust)
 import Data.Time (Day, UTCTime (utctDay), addDays, addGregorianMonthsRollOver, defaultTimeLocale, diffDays, formatTime, getCurrentTime, parseTimeM)
 import GHC.Read (Read (readPrec))
-import System.Directory
+import System.Directory (doesFileExist)
 import System.IO
+  ( IOMode (ReadMode, WriteMode),
+    hFlush,
+    hGetContents,
+    hPutStr,
+    openFile,
+  )
 
 readStorage :: IO [Produto]
 readStorage = do
@@ -46,9 +52,7 @@ data Produto = Produto
     nome :: String,
     quantidade :: Int,
     preco :: Double,
-    validade :: String,
-    created_at :: String,
-    updated_at :: String
+    validade :: String
   }
   deriving (Eq)
 
@@ -63,10 +67,6 @@ instance Show Produto where
       <> show (preco p)
       <> " | "
       <> show (validade p)
-      <> " | "
-      <> show (created_at p)
-      <> " | "
-      <> show (updated_at p)
 
 {-
   Separate the list of produtos into 2
@@ -86,7 +86,7 @@ updateUidAux :: [Produto] -> [Produto]
 updateUidAux [] = []
 updateUidAux produtos = do
   let produto = head produtos
-  let produto' = Produto (uid produto - 1) (nome produto) (quantidade produto) (preco produto) (validade produto) (created_at produto) (updated_at produto)
+  let produto' = Produto (uid produto - 1) (nome produto) (quantidade produto) (preco produto) (validade produto)
 
   produto' : updateUidAux (tail produtos)
 
@@ -101,7 +101,7 @@ verifyStorage produtos =
     else verifyStorage (tail produtos)
 
 {-
-Verifica a validade de um Produto em certa data. 
+Verifica a validade de um Produto em certa data.
 Retorna True se o produto estiver vencido
 -}
 verifyValidadeProduto :: Produto -> Day -> Bool
@@ -109,8 +109,8 @@ verifyValidadeProduto produto dia = diffDays dataValidade dia <= 0
   where
     dataValidade = fromJust $ parseTimeM True defaultTimeLocale "%d/%m/%0Y" (validade produto)
 
-{- 
-Verifica a validade dos produtos em certa data. 
+{-
+Verifica a validade dos produtos em certa data.
 Retorna uma lista de produtos vencidos.
 -}
 verifyValidadeEstoque :: [Produto] -> Day -> [Produto]
@@ -122,15 +122,13 @@ verifyValidadeEstoque produtos dia =
 
 convertToProduto :: String -> Produto
 convertToProduto linha =
-  let [uid, nome, quantidade, preco, validade, created_at, updated_at] = splitOn "," linha
+  let [uid, nome, quantidade, preco, validade] = splitOn "," linha
    in Produto
         { uid = read uid,
           nome = read nome,
           quantidade = read quantidade,
           preco = read preco,
-          validade = read validade,
-          created_at = read created_at,
-          updated_at = read updated_at
+          validade = read validade
         }
 
 convertToString :: Produto -> String
@@ -144,7 +142,3 @@ convertToString p =
     <> show (preco p)
     <> ","
     <> show (validade p)
-    <> ","
-    <> show (created_at p)
-    <> ","
-    <> show (updated_at p)

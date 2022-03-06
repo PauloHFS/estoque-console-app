@@ -27,6 +27,7 @@ library
   exposed-modules:
       Lib
       Storage
+      Validate
   other-modules:
       Paths_estoque_console_app
   hs-source-dirs:
