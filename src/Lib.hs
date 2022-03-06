@@ -108,7 +108,7 @@ delete :: [Produto] -> IO ()
 delete produtos = do
   putStrLn "Digite o uid do produto: "
   uid' <- getLine
-  if not (isEmptyInput uid') && isNumber (read uid') && isValidUid (length produtos) (read uid')
+  if not (isEmptyInput uid') && isNumber (uid') && isValidUid (length produtos) (read uid')
     then do
       let produtos' = filter (\p -> uid p /= read uid') produtos
       let produtos'' = updateUid produtos' (read uid') --atualiza o Uid dos produtos
@@ -125,8 +125,9 @@ checaValidade :: [Produto] -> IO ()
 checaValidade produtos = do
   putStrLn "Digite o uid do produto: "
   uid' <- getLine
-
-  if not (isEmptyInput uid') && isNumber (read uid') && isValidUid (length produtos) (read uid')
+  if not (isEmptyInput uid') 
+    && isNumber uid'
+    && isValidUid (length produtos) (read uid')
     then do
       let produto = head (filter (\p -> uid p == read uid') produtos) -- get a product by uid
       c <- getCurrentTime
@@ -172,7 +173,6 @@ updatePrice produtos = do
     && isValidUid (length produtos) (read uid')
     && isValidPrice (read inputNewPrice)
     then do
-      putStr "Alo"
       let newPrice = read inputNewPrice :: Double
       let produto = head (filter (\p -> uid p == read uid') produtos) -- get a product by uid
       let produtosL = filter (\p -> uid p < read uid') produtos
