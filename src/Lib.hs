@@ -22,7 +22,6 @@ menu = do
   putStrLn "\n"
   putStrLn "\t\t\tGERENCIAMENTO DE ESTOQUE RÁPIDO E SIMPLES"
   putStrLn "\n"
-
   putStrLn "Comandos:"
   putStrLn "c       - Adiciona um novo produto ao inventário"
   putStrLn "l       - Lista todos os produtos do inventário"
@@ -125,7 +124,6 @@ checaValidade :: [Produto] -> IO ()
 checaValidade produtos = do
   putStrLn "Digite o uid do produto: "
   uid' <- getLine
-
   if not (isEmptyInput uid') && isNumber (read uid') && isValidUid (length produtos) (read uid')
     then do
       let produto = head (filter (\p -> uid p == read uid') produtos) -- get a product by uid
@@ -172,7 +170,6 @@ updatePrice produtos = do
     && isValidUid (length produtos) (read uid')
     && isValidPrice (read inputNewPrice)
     then do
-      putStr "Alo"
       let newPrice = read inputNewPrice :: Double
       let produto = head (filter (\p -> uid p == read uid') produtos) -- get a product by uid
       let produtosL = filter (\p -> uid p < read uid') produtos
