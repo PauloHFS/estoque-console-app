@@ -135,22 +135,17 @@ checaValidade produtos = do
   putStrLn "Digite o uid do produto: "
   uid' <- getLine
 
-  if hasInvalidInputs [not (isEmptyInput uid')]
-    then
-      if hasInvalidInputs [isNumber uid', isValidUid (length produtos) (read uid')]
-        then do
-          putStr "Entrada invalida"
-          prompt produtos
-        else do
-          let produto = head (filter (\p -> uid p == read uid') produtos) -- get a product by uid
-          c <- getCurrentTime
-          let invalid = verifyValidadeProduto produto $ utctDay c
-          if invalid
-            then putStr "Fora da Validade"
-            else putStr "Dentro da Validade"
-          prompt produtos
+  if hasInvalidInputs [not (isEmptyInput uid'), isNumber uid', isValidUid (length produtos) (read uid')]
+    then do
+      putStr "Entrada invalida"
+      prompt produtos
     else do
-      putStr "Entrada invalida: entrada(s) vazia(s)"
+      let produto = head (filter (\p -> uid p == read uid') produtos) -- get a product by uid
+      c <- getCurrentTime
+      let invalid = verifyValidadeProduto produto $ utctDay c
+      if invalid
+        then putStr "Fora da Validade"
+        else putStr "Dentro da Validade"
       prompt produtos
 
 updateQuantity :: [Produto] -> IO ()
