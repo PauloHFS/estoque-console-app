@@ -7,22 +7,6 @@ where
 import Data.Maybe (isJust)
 import Data.Time
 import Storage
-  ( Produto,
-    createProduct,
-    created_at,
-    nome,
-    preco,
-    quantidade,
-    readStorage,
-    uid,
-    updateUid,
-    updated_at,
-    validade,
-    verifyStorage,
-    verifyValidadeEstoque,
-    verifyValidadeProduto,
-    writeStorage,
-  )
 import System.IO
 import Validate
 
@@ -96,7 +80,7 @@ create produtos = do
       isValidPrice (read inputPreco)
     ]
     then do
-      print "Entrada invalida"
+      putStr "Entrada invalida"
       prompt produtos
     else do
       let uid = length produtos
@@ -128,11 +112,12 @@ delete produtos = do
   putStrLn "Digite o uid do produto: "
   uid' <- getLine
   if hasInvalidInputs
-    [ isNumber (read uid'),
+    [ isEmptyInput uid',
+      isNumber (read uid'),
       isValidUid (length produtos) (read uid')
     ]
     then do
-      print "Entrada invalida"
+      putStr "Entrada invalida"
       prompt produtos
     else do
       let produtos' = filter (\p -> uid p /= read uid') produtos
@@ -140,18 +125,30 @@ delete produtos = do
       writeStorage produtos''
       prompt produtos''
 
+{-
+Verifica a validade de
+-}
 checaValidade :: [Produto] -> IO ()
 checaValidade produtos = do
   putStrLn "Digite o uid do produto: "
-  uid <- getLine
+  uid' <- getLine
 
-  let produto = head (filter (\p -> getUid p == read uid) produtos) -- get a product by uid
-  c <- getCurrentTime
-  let invalid = verifyValidadeProduto produto $ utctDay c
-  if invalid
-    then print "Fora da Validade"
-    else print "Dentro da Validade"
-  prompt produtos
+  if hasInvalidInputs
+    [ not (hasInvalidInputs (map isEmptyInput [uid'])),
+      isNumber uid',
+      isValidUid (length produtos) (read uid')
+    ]
+    then do
+      putStr "Entrada invalida"
+      prompt produtos
+    else do
+      let produto = head (filter (\p -> uid p == read uid') produtos) -- get a product by uid
+      c <- getCurrentTime
+      let invalid = verifyValidadeProduto produto $ utctDay c
+      if invalid
+        then putStr "Fora da Validade"
+        else putStr "Dentro da Validade"
+      prompt produtos
 
 updateQuantity :: [Produto] -> IO ()
 updateQuantity produtos = do
@@ -160,12 +157,13 @@ updateQuantity produtos = do
   putStrLn "Digite a nova quantidade: "
   inputNewQuantity <- getLine
   if hasInvalidInputs
-    [ not (hasInvalidInputs (map isNumber [uid', inputNewQuantity])),
+    [ not (hasInvalidInputs (map isEmptyInput [uid', inputNewQuantity])),
+      not (hasInvalidInputs (map isNumber [uid', inputNewQuantity])),
       isValidUid (length produtos) (read uid'),
       isValidQuantity (read inputNewQuantity)
     ]
     then do
-      print "Entrada invalida"
+      putStr "Entrada invalida"
       prompt produtos
     else do
       let newQuantity = read inputNewQuantity :: Int
@@ -183,12 +181,13 @@ updatePrice produtos = do
   putStrLn "Digite o novo preço: "
   inputNewPrice <- getLine
   if hasInvalidInputs
-    [ not (hasInvalidInputs (map isNumber [uid', inputNewPrice])),
+    [ not (hasInvalidInputs (map isEmptyInput [uid', inputNewPrice])),
+      not (hasInvalidInputs (map isNumber [uid', inputNewPrice])),
       isValidUid (length produtos) (read uid'),
       isValidPrice (read inputNewPrice)
     ]
     then do
-      print "Entrada invalida"
+      putStr "Entrada invalida"
       prompt produtos
     else do
       let newPrice = read inputNewPrice :: Double
@@ -223,14 +222,14 @@ filterByValidade produtos = do
       mapM_ print produtos'
   prompt produtos
 
---Mover para Util
+-- TODO: Mover para Util
 formatDate :: UTCTime -> String
 formatDate = formatTime defaultTimeLocale "%d/%m/%0Y"
 
---Mover para Util
+-- TODO: Mover para Util
 verifyVencido :: Day -> Day -> Bool
 verifyVencido currentDate userDate = diffDays userDate currentDate >= 0
 
---Mover para Util
+-- TODO: Mover para Util
 parseDate :: String -> Maybe Day
 parseDate = parseTimeM True defaultTimeLocale "%d/%m/%0Y"
