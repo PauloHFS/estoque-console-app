@@ -23,13 +23,9 @@ readStorage = do
   exists <- doesFileExist filename
   if exists
     then do
-      -- storage <- openFile filename ReadMode
-      -- conteudo <- hGetContents storage
       storage <- readFile filename
-
       let linhas = lines storage
       let produtos = map convertToProduto linhas
-
       return produtos
     else do
       writeFile filename ""
@@ -38,16 +34,9 @@ readStorage = do
 writeStorage :: [Produto] -> IO ()
 writeStorage produtos = do
   let filename = "storage.csv"
-
-  -- storage <- openFile filename WriteMode
-
   let linhas = map convertToString produtos
   let conteudo = unlines linhas
-
   writeFile filename conteudo
-
--- hPutStr storage conteudo
--- hFlush storage
 
 data Produto = Produto
   { uid :: Int,
@@ -80,7 +69,6 @@ updateUid [] oldUid = []
 updateUid produtos oldUid = do
   let produtosL = filter (\p -> uid p < oldUid) produtos
   let produtosR = filter (\p -> uid p > oldUid) produtos
-
   produtosL ++ updateUidAux produtosR
 
 --Recursively changes the Uid of the products
@@ -89,7 +77,6 @@ updateUidAux [] = []
 updateUidAux produtos = do
   let produto = head produtos
   let produto' = Produto (uid produto - 1) (nome produto) (quantidade produto) (preco produto) (validade produto)
-
   produto' : updateUidAux (tail produtos)
 
 {-

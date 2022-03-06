@@ -22,7 +22,6 @@ menu = do
   putStrLn "\n"
   putStrLn "\t\t\tGERENCIAMENTO DE ESTOQUE RÁPIDO E SIMPLES"
   putStrLn "\n"
-
   putStrLn "Comandos:"
   putStrLn "c       - Adiciona um novo produto ao inventário"
   putStrLn "l       - Lista todos os produtos do inventário"
