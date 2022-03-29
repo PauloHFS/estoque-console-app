@@ -8,11 +8,8 @@ read_storage(File):-
     assert_storage(Rows).
 
 %Asserts the rules in the knowledge db.
-assert_storage([]).
 assert_storage(Rows):-
-    [Head|Tail] = Rows,
-    assertz(Head),
-    assert_storage(Tail).
+    maplist(assertz, Rows).
 
 write_storage(File):-
     condese_rows(0, Rows),
