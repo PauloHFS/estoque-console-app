@@ -3,27 +3,28 @@
 :- use_module(library(csv)).
 
 %Verify the existence of a row in the knowledge base.
-row(N):- row(N,_,_,_,_).
+product(N):- product(N,_,_,_,_).
 
 %Reads the CSV file and returns a list of rules.
 read_storage:-
-    csv_read_file('E:\\Developer\\estoque-console-app\\prolog\\storage-example.csv', Rows),
-    assert_storage(Rows).
+    csv_read_file('E:\\Developer\\estoque-console-app\\prolog\\storage-example.csv',Products,[functor(product)]),
+    write(Products),
+    assert_storage(Products).
 
 %Writes the rules in the CSV file.
 write_storage(File):-
-    condese_rows(0, Rows),
-    csv_write_file(File, Rows).
+    condese_prod(0, Products),
+    csv_write_file(File, Products).
 
 %Writes the rules in the knowledge base.
-assert_storage(Rows):-
-    maplist(assertz, Rows).
+assert_storage(Products):-
+    maplist(assertz, Products).
 
-%Condenses the rows of the knowledge base into a list.
-condese_rows(N, Rows):- call(row(N)),
-    findall(row(Id,Nome,Quantidade,Preco,Data),row(Id,Nome,Quantidade,Preco,Data),Rows).
+%Condenses the Products of the knowledge base into a list.
+condese_prod(N, Products):- call(row(N)),
+    findall(product(Id,Nome,Quantidade,Preco,Data),product(Id,Nome,Quantidade,Preco,Data),Products).
 
-update_uid(Produtos, ID, NovosProdutos):- not(call(row(N))).
+update_uid(Produtos, ID, NovosProdutos):- not(call(product(N))).
 update_uid(Produtos, ID, NovosProdutos).
 
 update_uid_aux(Produtos, ID, NovosProdutos).
