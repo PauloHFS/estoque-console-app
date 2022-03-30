@@ -2,24 +2,40 @@
 
 :- use_module(library(csv)).
 
+:- dynamic
+    product/5.
+
 %Reads the CSV file and returns a list of rules.
 read_storage:-
-    csv_read_file('storage-example.csv',Products,[functor(product)]),
-    write(Products),
+    clean_up,
+    csv_read_file('E:\\Developer\\estoque-console-app\\prolog\\storage-example.csv',Products,[functor(product)]),
     assert_storage(Products).
 
 %Writes the rules in the CSV file.
 write_storage:-
     condense_prod(Products),
-    csv_write_file('storage-example.csv', Products).
+    csv_write_file('E:\\Developer\\estoque-console-app\\prolog\\storage-example.csv', Products).
 
 %Writes the rules in the knowledge base.
 assert_storage(Products):-
     maplist(assertz, Products).
 
 %Condenses the Products of the knowledge base into a list.
-condense_prod(Products):- 
-    findall(product(Id,Nome,Quantidade,Preco,Data),product(Id,Nome,Quantidade,Preco,Data),Products).
+condense_prod(Products):-
+    findall(product(Id,Nome,Quantidade,Preco,Data),product(Id,Nome,Quantidade,Preco,Data),Products),
+    writeln(Products).
+
+%Resets the knowledge base, to avoid reading twice.
+clean_up:-
+    retractall(product(_,_,_,_,_)).
+
+%Add a product to the knowledge base.
+%TODO: Add a check to avoid duplicates.
+%TODO: Add a check to avoid empty fields.
+%TODO: Add a check to verify if the fields are valid.
+%TODO: Add a generation of the ID.
+add_product(Product):-
+    assertz(Product).
 
 update_uid(OldID):-
     retractall(product((N,_,_,_,_), N>OldId)),
