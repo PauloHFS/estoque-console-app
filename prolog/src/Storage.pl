@@ -31,9 +31,21 @@ verify_expired_product(Product, ProductExpired).
 
 verify_expired_storage(Product, StorageExpired).
 
-diffDays(Time1, Time2, Diff):-
+/*
+    Calculates the difference between two Timestamps in days.
+*/
+diff_days(Time1, Time2, Diff):-
     stamp_date_time(Time1, DateTime, local),
     date_time_value(date, DateTime, Date),
 	date(YYYY, MM, DD) = Date,
 	date_time_stamp(date(YYYY,MM,DD,0,0,0,0,-,-), Time1Date),
     Diff is (Time1Date - Time2) / 86400.
+/*
+    Parses a String in the DD/MM/YYYY format into a Date.
+*/
+parse_date(String, Date):-
+	atom_chars(String, [C1,C2,C3,C4,C5,C6,C7,C8,C9,C10]),
+	number_chars(Day, [C1,C2]),
+	number_chars(Month, [C4,C5]),
+	number_chars(Year, [C7,C8,C9,C10]),
+	date(Year,Month,Day) = Date.
