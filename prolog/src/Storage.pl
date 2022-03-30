@@ -37,6 +37,18 @@ clean_up:-
 add_product(Product):-
     assertz(Product).
 
+%Remove a product from the knowledge base by ID.
+delete_product(Id):- 
+    call(product(Id,_,_,_,_)),
+    retract(product(Id,_,_,_,_)).
+
+%Update a product in the knowledge base.
+change_product_id(Id):-
+    NewId is Id - 1,
+    call(product(Id,Nome,Quantidade,Preco,Data)),
+    retract(product(Id,Nome,Quantidade,Preco,Data)),
+    assertz(product(NewId,Nome,Quantidade,Preco,Data)).
+
 update_uid(OldID):-
     retractall(product((N,_,_,_,_), N>OldId)),
     write(condense_prod(Products)).
