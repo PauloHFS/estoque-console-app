@@ -50,13 +50,9 @@ prompt:-
 
 /*
     Adiciona um novo produto ao inventário
-    TODO: pegar o proximo id do storage
     TODO: validar os dados de entradas
 */
 create:-
-    write('Digite o id do produto: '),
-    nl,
-    read(Id),
     write("Digite o nome do produto: "),
     nl,
     read(Nome),
@@ -69,7 +65,7 @@ create:-
     write("Digite a data de validade do produto: "),
     nl,
     read(Data),
-    add_product(product(Id, Nome, Quantidade, Preco, Data)),
+    add_product(product(_, Nome, Quantidade, Preco, Data)),
     write("Produto adicionado com sucesso!"),nl,
     prompt.
 
