@@ -69,7 +69,7 @@ create:-
     write("Digite a data de validade do produto: "),
     nl,
     read(Data),
-    assert(storage:product(Id, Nome, Quantidade, Preco, Data)),
+    add_product(product(Id, Nome, Quantidade, Preco, Data)),
     write("Produto adicionado com sucesso!"),nl,
     prompt.
 
@@ -107,8 +107,7 @@ updateQuantity:-
     write("Digite a nova quantidade do produto: "),
     nl,
     read(Quantidade),
-    retract(storage:product(Id, Nome, _, Preco, Data)),
-    assert(storage:product(Id, Nome, Quantidade, Preco, Data)),
+    update_quantity(id, Quantidade),
     write("Quantidade modificada com sucesso!"),
     nl,
     prompt.
@@ -125,8 +124,7 @@ updatePrice:-
     write("Digite o novo preço do produto: "),
     nl,
     read(Preco),
-    retract(storage:product(Name, Quantidade, _, Data)),
-    assert(storage:product(Nome, Quantidade, Preco, Data)),
+    update_price(id, Preco),
     write("Preço modificado com sucesso!"),
     nl,
     prompt.
@@ -139,7 +137,7 @@ delete:-
     write("Digite o id do produto: "),
     nl,
     read(Id),
-    retract(storage:product(Id, _, _, _)),
+    delete_product(Id),
     write("Produto removido com sucesso!"),
     nl,
     prompt.

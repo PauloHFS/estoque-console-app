@@ -1,4 +1,4 @@
-:- module(storage, [read_storage/0, write_storage/0]).
+:- module(storage, [read_storage/0, write_storage/0, delete_product/1, add_product/1, update_price/2, update_quantity/2]).
 
 :- use_module(library(csv)).
 
@@ -50,6 +50,11 @@ update_product_id(Id):-
     retract(product(Id,Nome,Quantidade,Preco,Data)),
     assertz(product(NewId,Nome,Quantidade,Preco,Data)).
 
+update_quantity(Id,NewQuant):-
+    retract(product(Id,Nome,Quantidade,Preco,Data)),
+    NewQuant is Quantidade + NewQuant,
+    assertz(product(Id,Nome,NewQuant,Preco,Data)).
+
 %Update the Id of all products greater than Old Id in the knowledge base.
 update_id(OldId):-
     forall(product(Id,Nome,Quantidade,Preco,Data), not(OldId<Id);update_product_id(Id)).
@@ -58,7 +63,7 @@ update_id(OldId):-
 %TODO: Add a check to verify if the ID exists.
 %TODO: Add a check to verify if the price is valid.
 %TODO: Add a check to verify if the price is different from the old one.
-update_product_id(Id,NewPreco):-
+update_price(Id,NewPreco):-
     retract(product(Id,Nome,Quantidade,Preco,Data)),
     assertz(product(Id,Nome,Quantidade,NewPreco,Data)).
 
