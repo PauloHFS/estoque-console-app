@@ -1,4 +1,4 @@
-:- module(storage, [read_storage/0, write_storage/0, delete_product/1, add_product/1, update_price/2, update_quantity/2]).
+:- module(storage, [read_storage/0, write_storage/0, delete_product/1, add_product/1, update_price/2, update_quantity/2, verify_storage/0]).
 
 :- use_module(library(csv)).
 
@@ -91,7 +91,22 @@ update_price(Id,NewPreco):-
     retract(product(Id,Nome,Quantidade,Preco,Data)),
     assertz(product(Id,Nome,Quantidade,NewPreco,Data)).
 
-verify_storage(Product, ProductVazios).
+verify_storage:-
+    forall(product(Id, Nome, Quantidade, Preco, Data),
+        (
+            not(Quantidade =< 0);
+            write(Id),
+            write(" | "),
+            write(Nome),
+            write(" | "),
+            write(Quantidade),
+            write(" | "),
+            write(Preco),
+            write(" | "),
+            write(Data),
+            nl
+        )
+    ).
 
 verify_expired_product(Id):-
     product(Id,Nome,Quantidade,Preco,DateString),
