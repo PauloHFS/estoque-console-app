@@ -41,8 +41,8 @@ Manter o controle do estoque da conveniência, permitindo à gerência total con
 ## Para o rodar o projeto:
 
 1. Clone o projeto.
-2. Instale o [Stack](https://docs.haskellstack.org/en/stable/install_and_upgrade/). Stack é um programa multiplataforma para desenvolvimento de projetos Haskell.
-3. Execute o seguinte comando na raiz do projeto:
+2. Execute os seguintes comandos na raiz do projeto:
 ```sh
-stack run
+$ swipl -s src/main.pl
+?- main.
 ```
