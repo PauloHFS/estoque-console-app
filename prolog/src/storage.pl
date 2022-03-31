@@ -38,20 +38,22 @@ add_product(Product):-
     assertz(Product).
 
 %Remove a product from the knowledge base by ID.
+%TODO: Add a check to verify if the ID exists.
 delete_product(Id):- 
     call(product(Id,_,_,_,_)),
-    retract(product(Id,_,_,_,_)).
+    retract(product(Id,_,_,_,_)),
+    update_id(Id).
 
-%Update a product in the knowledge base.
-change_product_id(Id):-
+%Update a ID of product in the knowledge base.
+update_product_id(Id):-
     NewId is Id - 1,
-    call(product(Id,Nome,Quantidade,Preco,Data)),
     retract(product(Id,Nome,Quantidade,Preco,Data)),
-    assertz(product(NewId,Nome,Quantidade,Preco,Data)).
+    assertz(product(NewId,Nome,Quantidade,Preco,Data)),
+    write(product(NewId,Nome,Quantidade,Preco,Data)).
 
-update_uid(OldID):-
-    retractall(product((N,_,_,_,_), N>OldId)),
-    write(condense_prod(Products)).
+%Update the Id of all products greater than Old Id in the knowledge base.
+update_id(OldId):-
+    forall(product(Id,Nome,Quantidade,Preco,Data), not(OldId<Id);update_product_id(Id)).
 
 verify_storage(Product, ProductVazios).
 
