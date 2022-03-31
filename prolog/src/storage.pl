@@ -61,7 +61,6 @@ update_product_id(Id):-
 
 update_quantity(Id,NewQuant):-
     retract(product(Id,Nome,Quantidade,Preco,Data)),
-    NewQuant is Quantidade + NewQuant,
     assertz(product(Id,Nome,NewQuant,Preco,Data)).
 
 %Update the Id of all products greater than Old Id in the knowledge base.
@@ -88,16 +87,17 @@ verify_expired_product(Id):-
 
 verify_expired_storage:-
     forall(product(Id, Nome, Quantidade, Preco, Data), not(verify_expired_product(Id)); 
-    (write("("),
+    (
     write(Id),
-    write(") "),nl,
+    write(" | "),
     write(Nome),
-    write(" - Quantidade: "),
+    write(" | "),
     write(Quantidade),
-    write(" - Preço: "),
+    write(" | "),
     write(Preco),
-    write(" - Data: "),
-    write(Data),nl)).
+    write(" | "),
+    write(Data),nl)
+    ).
 
 /*
     Calculates the difference between two Timestamps in days.
