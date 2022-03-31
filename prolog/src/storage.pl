@@ -1,4 +1,4 @@
-:- module(storage, [read_storage/0]).
+:- module(storage, [read_storage/0, write_storage/0]).
 
 :- use_module(library(csv)).
 
@@ -8,13 +8,14 @@
 %Reads the CSV file and returns a list of rules.
 read_storage:-
     clean_up,
-    csv_read_file('E:\\Developer\\estoque-console-app\\prolog\\storage-example.csv',Products,[functor(product)]),
-    assert_storage(Products).
+    csv_read_file('storage-example.csv',Products,[functor(product)]),
+    assert_storage(Products),
+    write('Storage loaded.'),nl.
 
 %Writes the rules in the CSV file.
 write_storage:-
     condense_prod(Products),
-    csv_write_file('E:\\Developer\\estoque-console-app\\prolog\\storage-example.csv', Products).
+    csv_write_file('storage-example.csv', Products).
 
 %Writes the rules in the knowledge base.
 assert_storage(Products):-
@@ -22,8 +23,7 @@ assert_storage(Products):-
 
 %Condenses the Products of the knowledge base into a list.
 condense_prod(Products):-
-    findall(product(Id,Nome,Quantidade,Preco,Data),product(Id,Nome,Quantidade,Preco,Data),Products),
-    writeln(Products).
+    findall(product(Id,Nome,Quantidade,Preco,Data),product(Id,Nome,Quantidade,Preco,Data),Products).
 
 %Resets the knowledge base, to avoid reading twice.
 clean_up:-

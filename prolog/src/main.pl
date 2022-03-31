@@ -1,21 +1,9 @@
-:- consult('src/Storage.pl').
+:- use_module('storage.pl').
 
-waitKey(ValidKeys, ReturnedKey) :- 
-    write('>'),                      
-    get_single_char(X),                        
-    char_code(Y, X),                           
-    (member(Y, ValidKeys) ->
-    ReturnedKey = Y;
-    waitKey(ValidKeys, K), ReturnedKey = K).
+:- dynamic
+    product/5.
 
-get_key(X):-
-    ttyflush, 
-    get_single_char(Y), 
-    atom_char(X, Y).
-
-%Display a console menu in prolog
 menu:-
-    read_storage,
     write(""),nl,
     write("███████╗███╗   ███╗ █████╗ ██████╗ ████████╗    ███╗   ███╗ ██████╗ ███╗   ███╗████████╗"),nl,
     write("██╔════╝████╗ ████║██╔══██╗██╔══██╗╚══██╔══╝    ████╗ ████║██╔════╝ ████╗ ████║╚══██╔══╝"),nl,
@@ -40,174 +28,159 @@ menu:-
     prompt.
     
 prompt:-
-    waitKey(['c','l','mq','mp','d','v','cv','z','h','q'], Choice),
+    nl,
+    write("Comando desejado:"),
+    nl,
+    read(Choice),
     (
-        Choice == 'c' -> addProduct;
-        Choice == 'l' -> listProducts;
-        Choice == 'mq' -> modifyQuantity;
-        Choice == 'mp' -> modifyPrice;
-        Choice == 'd' -> removeProduct;
-        Choice == 'v' -> verifyProducts;
-        Choice == 'cv' -> verifyProduct;
-        Choice == 'z' -> verifyZeros;
+        Choice == 'c' -> create;
+        Choice == 'l' -> list;
+        Choice == 'mq' -> updateQuantity;
+        Choice == 'mp' -> updatePrice;
+        Choice == 'd' -> delete;
+        Choice == 'v' -> filterByValidade;
+        Choice == 'cv' -> checaValidade;
+        Choice == 'z' -> filterByQuantityZero;
         Choice == 'h' -> menu;
-        Choice == 'q' -> halt;
+        Choice == 'q' -> write_storage(), halt;
+        write("Comando inválido!"),
+        nl,
         prompt
     ).
 
-dynamic product/5.
-
-addProduct:-
+/*
+    Adiciona um novo produto ao inventário
+    TODO: pegar o proximo id do storage
+    TODO: validar os dados de entradas
+*/
+create:-
     write('Digite o id do produto: '),
+    nl,
     read(Id),
     write("Digite o nome do produto: "),
+    nl,
     read(Nome),
     write("Digite a quantidade do produto: "),
+    nl,
     read(Quantidade),
     write("Digite o preço do produto: "),
+    nl,
     read(Preco),
     write("Digite a data de validade do produto: "),
+    nl,
     read(Data),
-    assert(product(Id, Nome, Quantidade, Preco, Data)),
+    assert(storage:product(Id, Nome, Quantidade, Preco, Data)),
     write("Produto adicionado com sucesso!"),nl,
     prompt.
 
-listProducts:-
-    write("Lista de produtos:"),nl,
-    forall(product(Id, Nome, Quantidade, Preco, Data),
+/*
+    Lista todos os produtos do inventário
+*/
+list:-
+    write("uid | nome | quantidade | preco | validade"),
+    nl,
+    forall(storage:product(Id, Nome, Quantidade, Preco, Data),
         (
-            write("("),
             write(Id),
-            write(") "),nl,
+            write(" | "),
             write(Nome),
-            write(" - Quantidade: "),
+            write(" | "),
             write(Quantidade),
-            write(" - Preço: "),
+            write(" | "),
             write(Preco),
-            write(" - Data: "),
-            write(Data),nl
+            write(" | "),
+            write(Data),
+            nl
         )
     ),
     prompt.
 
-modifyQuantity:-
+/*
+    Modifica a quantidade de um produto
+    TODO: validar os dados de entrada
+    TODO: verificar se o produto com o Id existe
+*/
+updateQuantity:-
     write("Digite o id do produto: "),
+    nl,
     read(Id),
     write("Digite a nova quantidade do produto: "),
+    nl,
     read(Quantidade),
-    retract(product(Id, Nome, _, Preco, Data)),
-    assert(product(Id, Nome, Quantidade, Preco, Data)),
-    write("Quantidade modificada com sucesso!"),nl,
+    retract(storage:product(Id, Nome, _, Preco, Data)),
+    assert(storage:product(Id, Nome, Quantidade, Preco, Data)),
+    write("Quantidade modificada com sucesso!"),
+    nl,
     prompt.
 
-modifyPrice:-
+/*
+    Modifica o preço de um produto
+    TODO: validar os dados de entrada
+    TODO: verificar se o produto com o Id existe
+*/
+updatePrice:-
     write("Digite o id do produto: "),
+    nl,
     read(Id),
     write("Digite o novo preço do produto: "),
+    nl,
     read(Preco),
-    retract(product(Name, Quantidade, _, Data)),
-    assert(product(Nome, Quantidade, Preco, Data)),
-    write("Preço modificado com sucesso!"),nl,
+    retract(storage:product(Name, Quantidade, _, Data)),
+    assert(storage:product(Nome, Quantidade, Preco, Data)),
+    write("Preço modificado com sucesso!"),
+    nl,
     prompt.
 
-removeProduct:-
+/*
+    Remove um produto do inventário
+    TODO: verificar se o produto com o Id existe
+*/
+delete:-
     write("Digite o id do produto: "),
+    nl,
     read(Id),
-    retract(product(Id, _, _, _)),
-    write("Produto removido com sucesso!"),nl,
+    retract(storage:product(Id, _, _, _)),
+    write("Produto removido com sucesso!"),
+    nl,
     prompt.
 
-verifyProducts:-
-    write("Lista de produtos:"),nl,
-    forall(product(Id, Nome, Quantidade, Preco, Data),
+/*
+    Verifica validade dos produtos
+    TODO:
+*/
+filterByValidade:-
+ prompt.
+
+/*
+    Verifica validade de um produto
+    TODO: 
+*/
+checaValidade:-
+    prompt.
+
+/*
+    Verifica produtos com quantidade menor igual a zero
+*/
+filterByQuantityZero:-
+    write("Produtos com quantidade zerada:"),
+    nl,
+    forall(storage:product(Id, Nome, Quantidade, Preco, Data),
         (
-            write("("),
+            not(Quantidade =< 0);
             write(Id),
-            write(") "),
+            write(" | "),
             write(Nome),
-            write(" - Quantidade: "),
+            write(" | "),
             write(Quantidade),
-            write(" - Preço: "),
+            write(" | "),
             write(Preco),
-            write(" - Data:"),
-            write(Data),nl
-        )
-    ),
-    write("Produtos com validade vencida:"),nl,
-    forall(product(Id, Nome, Quantidade, Preco, Data),
-        (
-            (
-                Quantity < 0 ->
-                write("("),
-                write(Id),
-                write(") "),
-                write(Nome),
-                write(" - Quantidade: "),
-                write(Quantidade),
-                write(" - Preço: "),
-                write(Preco),
-                write(" - Data:"),
-                write(Data),nl
-            )
+            write(" | "),
+            write(Data),
+            nl
         )
     ),
     prompt.
 
-verifyProduct:-
-    write("Digite o nome do produto: "),
-    read(Id),
-    (
-        product(Id, Nome, Quantidade, Preco, Data) ->
-        write("Produto encontrado!"),nl,
-        write("("),
-        write(Id),
-        write(") "),
-        write(Nome),
-        write(" - Quantidade: "),
-        write(Quantidade),
-        write(" - Preço: "),
-        write(Preco),
-        write(" - Data:"),
-        write(Data),nl;
-        write("Produto não encontrado!"),nl
-    ),
-    prompt.
-
-verifyZeros:-
-    write("Lista de produtos:"),nl,
-    forall(product(Id, Nome, Quantidade, Preco, Data),
-        (
-            write("("),
-            write(Id),
-            write(") "),
-            write(Nome),
-            write(" - Quantidade: "),
-            write(Quantidade),
-            write(" - Preço: "),
-            write(Preco),
-            write(" - Data:"),
-            write(Data),nl
-        )
-    ),
-    write("Produtos com quantidade zerada:"),nl,
-    forall(product(Id, Nome, Quantidade, Preco, Data),
-        (
-            (
-                Quantity == 0 ->
-                write("("),
-                write(Id),
-                write(") "),
-                write(Nome),
-                write(" - Quantidade: "),
-                write(Quantidade),
-                write(" - Preço: "),
-                write(Preco),
-                write(" - Data:"),
-                write(Data),nl
-            )
-        )
-    ),
-    prompt.
-
-
-main:- menu.
+main:- 
+    read_storage(),
+    menu.
