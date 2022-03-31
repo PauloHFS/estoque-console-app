@@ -48,12 +48,19 @@ delete_product(Id):-
 update_product_id(Id):-
     NewId is Id - 1,
     retract(product(Id,Nome,Quantidade,Preco,Data)),
-    assertz(product(NewId,Nome,Quantidade,Preco,Data)),
-    write(product(NewId,Nome,Quantidade,Preco,Data)).
+    assertz(product(NewId,Nome,Quantidade,Preco,Data)).
 
 %Update the Id of all products greater than Old Id in the knowledge base.
 update_id(OldId):-
     forall(product(Id,Nome,Quantidade,Preco,Data), not(OldId<Id);update_product_id(Id)).
+
+%Update a price of product in the knowledge base.
+%TODO: Add a check to verify if the ID exists.
+%TODO: Add a check to verify if the price is valid.
+%TODO: Add a check to verify if the price is different from the old one.
+update_product_id(Id,NewPreco):-
+    retract(product(Id,Nome,Quantidade,Preco,Data)),
+    assertz(product(Id,Nome,Quantidade,NewPreco,Data)).
 
 verify_storage(Product, ProductVazios).
 
