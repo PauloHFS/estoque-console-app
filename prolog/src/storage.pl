@@ -34,7 +34,16 @@ clean_up:-
 %TODO: Add a check to verify if the fields are valid.
 %TODO: Add a generation of the ID.
 add_product(Product):-
+    generate_id(Id),
+    Product = product(Id,Nome,Quantidade,Preco,Data),
+    check_product(Nome,Quantidade,Preco,Data),
     assertz(Product).
+
+%Generates an ID for a product.
+generate_id(NextId):-
+    findall(Id,product(Id,_,_,_,_),Ids),
+    length(Ids,LastId),
+    NextId is LastId + 1.
 
 %Remove a product from the knowledge base by ID.
 %TODO: Add a check to verify if the ID exists.
@@ -57,7 +66,7 @@ update_id(OldId):-
 %TODO: Add a check to verify if the ID exists.
 %TODO: Add a check to verify if the price is valid.
 %TODO: Add a check to verify if the price is different from the old one.
-update_product_id(Id,NewPreco):-
+update_price(Id,NewPreco):-
     retract(product(Id,Nome,Quantidade,Preco,Data)),
     assertz(product(Id,Nome,Quantidade,NewPreco,Data)).
 
@@ -87,3 +96,11 @@ parse_date(String, Date):-
 	number_chars(Year, [C7,C8,C9,C10]),
 	date(Year,Month,Day) = Date.
 
+%Checks if a product is valid.
+check_product(Nome, Quantidade, Preco, Data):-
+    Nome \= '',
+    Quantidade \= '',
+    Preco \= '',
+    Data \= '',
+    Preco > 0,
+    Quantidade > 0.
