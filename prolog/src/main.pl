@@ -103,7 +103,7 @@ updateQuantity:-
     write("Digite a nova quantidade do produto: "),
     nl,
     read(Quantidade),
-    update_quantity(id, Quantidade),
+    update_quantity(Id, Quantidade),
     write("Quantidade modificada com sucesso!"),
     nl,
     prompt.
@@ -120,7 +120,7 @@ updatePrice:-
     write("Digite o novo preço do produto: "),
     nl,
     read(Preco),
-    update_price(id, Preco),
+    update_price(Id, Preco),
     write("Preço modificado com sucesso!"),
     nl,
     prompt.
