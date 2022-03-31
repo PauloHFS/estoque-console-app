@@ -86,7 +86,7 @@ verify_expired_product(Id):-
     diff_days(CurrentTime, ProductTime, Diff),
     Diff>0.
 
-verify_expired_storage():-
+verify_expired_storage:-
     forall(product(Id, Nome, Quantidade, Preco, Data), not(verify_expired_product(Id)); 
     (write("("),
     write(Id),
