@@ -1,4 +1,5 @@
 :- use_module('storage.pl').
+:- use_module(util, [read_string/1]).
 
 :- dynamic
     product/5.
@@ -47,6 +48,13 @@ prompt:-
         nl,
         prompt
     ).
+
+prompt:-
+    true,
+    nl,
+    write("Dados inválidos!"),
+    nl,
+    prompt.
 
 /*
     Adiciona um novo produto ao inventário
