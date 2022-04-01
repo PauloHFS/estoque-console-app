@@ -43,6 +43,9 @@ read_string(String) :-
     current_input(Input),
     read_line_to_codes(Input, Codes),
     string_codes(String, Codes).
+%% read_number(-Number) is nondet
+%Reads a line from the terminal and returns it as Number.
+% @param Number is the line read from the terminal.
 read_number(Number):-
     read_string(String),
     number_string(Number, String).
