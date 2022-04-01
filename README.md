@@ -40,9 +40,5 @@ Manter o controle do estoque da conveniência, permitindo à gerência total con
 
 ## Para o rodar o projeto:
 
-1. Clone o projeto.
-2. Instale o [Stack](https://docs.haskellstack.org/en/stable/install_and_upgrade/). Stack é um programa multiplataforma para desenvolvimento de projetos Haskell.
-3. Execute o seguinte comando na raiz do projeto:
-```sh
-stack run
-```
+1. Clone o projeto;
+2. Siga as instruções propostas para cada um dos paradigmas: você as encontrará em estoque-console-app/haskell/ (para o paradigma funcional), e estoque-console-app/prolog/ (para o paradigma lógico).
