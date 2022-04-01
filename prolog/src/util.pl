@@ -13,7 +13,12 @@ check_product(Nome, Quantidade, Preco, Data):-
     Data \= '',
     Preco > 0,
     Quantidade >= 0,
-    check_date(Data).
+    check_date(Data),
+    parse_date(Data, DataParsed),
+    date_time_stamp(DataParsed, ProductTime),
+    get_time(CurrentTime),
+    diff_days(CurrentTime, ProductTime, Diff),
+    Diff<0.
 
 %% check_quantity(+Quantity) is semidet
 %Checks if a quantity is valid.
