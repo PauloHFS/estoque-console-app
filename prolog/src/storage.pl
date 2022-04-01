@@ -21,7 +21,7 @@ read_storage:-
     assert_storage(Products).
 
 % Reads the CSV file and returns a list of facts.
-%If the file does not exist, it creates a new one.
+%If the file does not exist, it creates a new one, and returns an empty list.
 read_storage:-
     clean_up,
     not(exists_file('storage.csv')),
@@ -35,7 +35,7 @@ write_storage:-
     csv_write_file('storage.csv', Products).
 
 %Writes the facts in the CSV file.
-%If the file does not exist, it creates a new one.
+%If the file does not exist, it creates a new one, and writes the facts.
 write_storage:-
     not(exists_file('storage.csv')),
     create_storage_file,
@@ -64,18 +64,31 @@ clean_up:-
 % @param Product is a fact.
 %TODO: Verify if a date is valid.
 add_product(Product):-
-    generate_id(Id),
+    generate_id_length(Id),
     Product = product(Id,Nome,Quantidade,Preco,Data),
     util:check_product(Nome,Quantidade,Preco,Data),
     assertz(Product).
 
-%% generate_id(-Id) is det
+%% generate_id_length(-Id) is det
 %Generates an ID for a product.
 % @param Id is an integer.
-generate_id(NextId):-
+generate_id_length(NextId):-
     findall(Id,product(Id,_,_,_,_),Ids),
     length(Ids,LastId),
     NextId is LastId.
+
+%% generate_id_empty(-Id) is det
+%Generates an ID for a product by the empty spot at the knowledge base.
+% @param NextId is an integer.
+generate_id_empty(NextId):-
+    call(product(NextId,_,_,_,_)),
+    NextId is Id + 1,
+    generate_if_empty(NextId).
+
+%% generate_id_empty(+Id) is det
+%Ends the generation of an ID for a product.
+% @param NextId is an integer.
+generate_id_empty(NextId).
 
 %% delete_product(+Id) is semidet
 %Remove a product from the knowledge base by ID.
