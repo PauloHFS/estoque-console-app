@@ -21,7 +21,7 @@ read_storage:-
     assert_storage(Products).
 
 % Reads the CSV file and returns a list of facts.
-%If the file does not exist, it creates a new one.
+%If the file does not exist, it creates a new one, and returns an empty list.
 read_storage:-
     clean_up,
     not(exists_file('storage.csv')),
@@ -35,7 +35,7 @@ write_storage:-
     csv_write_file('storage.csv', Products).
 
 %Writes the facts in the CSV file.
-%If the file does not exist, it creates a new one.
+%If the file does not exist, it creates a new one, and writes the facts.
 write_storage:-
     not(exists_file('storage.csv')),
     create_storage_file,
@@ -64,18 +64,31 @@ clean_up:-
 % @param Product is a fact.
 %TODO: Verify if a date is valid.
 add_product(Product):-
-    generate_id(Id),
+    generate_id_length(Id),
     Product = product(Id,Nome,Quantidade,Preco,Data),
     util:check_product(Nome,Quantidade,Preco,Data),
     assertz(Product).
 
-%% generate_id(-Id) is det
+%% generate_id_length(-Id) is det
 %Generates an ID for a product.
 % @param Id is an integer.
-generate_id(NextId):-
+generate_id_length(NextId):-
     findall(Id,product(Id,_,_,_,_),Ids),
     length(Ids,LastId),
     NextId is LastId.
+
+%% generate_id_empty(-Id) is det
+%Generates an ID for a product by the empty spot at the knowledge base.
+% @param NextId is an integer.
+generate_id_empty(NextId):-
+    call(product(NextId,_,_,_,_)),
+    NextId is Id + 1,
+    generate_if_empty(NextId).
+
+%% generate_id_empty(+Id) is det
+%Ends the generation of an ID for a product.
+% @param NextId is an integer.
+generate_id_empty(NextId).
 
 %% delete_product(+Id) is semidet
 %Remove a product from the knowledge base by ID.
@@ -96,18 +109,18 @@ update_product_id(Id):-
 %% update_quantity(+Id, +Quantity) is semidet
 %Update the quantity of a product in the knowledge base.
 % @param Id is an integer.
-% @param Quantity is an integer.
+% @param NewQuantity is an integer.
 update_quantity(Id,NewQuant):-
     call(product(Id,_,_,_,_)),
     util:check_quantity(NewQuant),
-    retract(product(Id,Nome,Quantidade,Preco,Data)),
+    retract(product(Id,Nome,_,Preco,Data)),
     assertz(product(Id,Nome,NewQuant,Preco,Data)).
 
 %% update_id(+Id) is det
 %Update the Id of all products greater than Old Id in the knowledge base.
 % @param Id is an integer.
 update_id(OldId):-
-    forall(product(Id,Nome,Quantidade,Preco,Data), not(OldId<Id);update_product_id(Id)).
+    forall(product(Id,_,_,_,_), not(OldId<Id);update_product_id(Id)).
 
 %% update_price(+Id, +Price) is semidet
 %Update a price of product in the knowledge base.
@@ -116,7 +129,7 @@ update_id(OldId):-
 update_price(Id,NewPreco):-
     call(product(Id,_,_,_,_)),
     util:check_price(NewPreco),
-    retract(product(Id,Nome,Quantidade,Preco,Data)),
+    retract(product(Id,Nome,Quantidade,_,Data)),
     assertz(product(Id,Nome,Quantidade,NewPreco,Data)).
 
 %% verify_storage is det
@@ -133,7 +146,7 @@ verify_storage:-
 %Returns a product expired in the knowledge base.
 % @param Id is an integer.
 verify_expired_product(Id):-
-    product(Id,Nome,Quantidade,Preco,DateString),
+    product(Id,_,_,_,DateString),
     util:parse_date(DateString, Date),
     date_time_stamp(Date, ProductTime),
     get_time(CurrentTime),
