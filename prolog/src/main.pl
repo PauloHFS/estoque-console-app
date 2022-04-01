@@ -1,5 +1,5 @@
 :- use_module('storage.pl').
-:- use_module(util, [read_string/1]).
+:- use_module(util, [read_string/1, read_number/1]).
 
 :- dynamic
     product/5.
@@ -32,18 +32,18 @@ prompt:-
     nl,
     write("Comando desejado:"),
     nl,
-    read(Choice),
+    read_string(Choice),
     (
-        Choice == 'c' -> create;
-        Choice == 'l' -> list;
-        Choice == 'mq' -> update_quantity;
-        Choice == 'mp' -> update_price;
-        Choice == 'd' -> delete;
-        Choice == 'v' -> filter_expired;
-        Choice == 'cv' -> verify_expired;
-        Choice == 'z' -> filter_out_of_stock;
-        Choice == 'h' -> menu;
-        Choice == 'q' -> write_storage(), halt;
+        Choice == "c" -> create;
+        Choice == "l" -> list;
+        Choice == "mq" -> update_quantity;
+        Choice == "mp" -> update_price;
+        Choice == "d" -> delete;
+        Choice == "v" -> filter_expired;
+        Choice == "cv" -> verify_expired;
+        Choice == "z" -> filter_out_of_stock;
+        Choice == "h" -> menu;
+        Choice == "q" -> write_storage(), halt;
         write("Comando inválido!"),
         nl,
         prompt
@@ -63,16 +63,16 @@ prompt:-
 create:-
     write("Digite o nome do produto: "),
     nl,
-    read(Nome),
+    read_string(Nome),
     write("Digite a quantidade do produto: "),
     nl,
-    read(Quantidade),
+    read_number(Quantidade),
     write("Digite o preço do produto: "),
     nl,
-    read(Preco),
+    read_number(Preco),
     write("Digite a data de validade do produto: "),
     nl,
-    read(Data),
+    read_string(Data),
     add_product(product(_, Nome, Quantidade, Preco, Data)),
     write("Produto adicionado com sucesso!"),nl,
     prompt.
@@ -107,10 +107,10 @@ list:-
 update_quantity:-
     write("Digite o id do produto: "),
     nl,
-    read(Id),
+    read_number(Id),
     write("Digite a nova quantidade do produto: "),
     nl,
-    read(Quantidade),
+    read_number(Quantidade),
     update_quantity(Id, Quantidade),
     write("Quantidade modificada com sucesso!"),
     nl,
@@ -124,10 +124,10 @@ update_quantity:-
 update_price:-
     write("Digite o id do produto: "),
     nl,
-    read(Id),
+    read_number(Id),
     write("Digite o novo preço do produto: "),
     nl,
-    read(Preco),
+    read_number(Preco),
     update_price(Id, Preco),
     write("Preço modificado com sucesso!"),
     nl,
@@ -140,7 +140,7 @@ update_price:-
 delete:-
     write("Digite o id do produto: "),
     nl,
-    read(Id),
+    read_number(Id),
     delete_product(Id),
     write("Produto removido com sucesso!"),
     nl,
@@ -162,7 +162,7 @@ filter_expired:-
 verify_expired:-
     write("Digite o id do produto: "),
     nl,
-    read(Id),
+    read_number(Id),
     storage:check_product_exists(Id),
     (storage:verify_expired_product(Id) -> write("Produto com validade vencida!"); 
     write("Produto com validade válida!")),

@@ -1,4 +1,4 @@
-:- module(util, [check_product/4, check_price/1, check_quantity/1, check_date/1, parse_date/2, diff_days/3, read_string/1]).
+:- module(util, [check_product/4, check_price/1, check_quantity/1, check_date/1, parse_date/2, diff_days/3, read_string/1, read_number/1]).
 
 %% check_product(+Product, +Quantity, +Price, +Data) is semidet
 %Checks if a product is valid.
@@ -43,7 +43,9 @@ read_string(String) :-
     current_input(Input),
     read_line_to_codes(Input, Codes),
     string_codes(String, Codes).
-
+read_number(Number):-
+    read_string(String),
+    number_string(Number, String).
 %% diff_days(+Date1, +Date2, -Diff) is det
 %Calculates the difference between two Timestamps in days.
 % @param Date1 is the first Timestamp.

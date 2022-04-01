@@ -83,7 +83,7 @@ generate_id_length(NextId):-
 generate_id_empty(NextId):-
     call(product(NextId,_,_,_,_)),
     NextId is Id + 1,
-    generate_if_empty(NextId).
+    generate_id_empty(NextId).
 
 %% generate_id_empty(+Id) is det
 %Ends the generation of an ID for a product.
