@@ -1,6 +1,7 @@
 :- module(storage, [read_storage/0, write_storage/0, delete_product/1, add_product/1, update_price/2, update_quantity/2]).
 
 :- use_module(library(csv)).
+:- use_module(util).
 
 :- dynamic
     product/5.
@@ -30,14 +31,14 @@ clean_up:-
     retractall(product(_,_,_,_,_)).
 
 %Add a product to the knowledge base.
-%TODO: Add a check to avoid duplicates.
-%TODO: Add a check to avoid empty fields.
-%TODO: Add a check to verify if the fields are valid.
-%TODO: Add a generation of the ID.
+%TODO: Add a check to avoid empty fields. DONE.
+%TODO: Add a check to verify if the fields are valid. DONE.
+%TODO: Verify if a date is valid.
+%TODO: Add a generation of the ID. DONE.
 add_product(Product):-
     generate_id(Id),
     Product = product(Id,Nome,Quantidade,Preco,Data),
-    check_product(Nome,Quantidade,Preco,Data),
+    util:check_product(Nome,Quantidade,Preco,Data),
     assertz(Product).
 
 %Generates an ID for a product.
@@ -47,7 +48,7 @@ generate_id(NextId):-
     NextId is LastId + 1.
 
 %Remove a product from the knowledge base by ID.
-%TODO: Add a check to verify if the ID exists.
+%TODO: Add a check to verify if the ID exists. DONE.
 delete_product(Id):- 
     call(product(Id,_,_,_,_)),
     retract(product(Id,_,_,_,_)),
@@ -59,7 +60,12 @@ update_product_id(Id):-
     retract(product(Id,Nome,Quantidade,Preco,Data)),
     assertz(product(NewId,Nome,Quantidade,Preco,Data)).
 
+%Update the quantity of a product in the knowledge base.
+%TODO: Add a check to verify if the ID exists. DONE.
+%TODO: Add a check to verify if the quantity is valid. DONE.
 update_quantity(Id,NewQuant):-
+    call(product(Id,_,_,_,_)),
+    util:check_quantity(NewQuant),
     retract(product(Id,Nome,Quantidade,Preco,Data)),
     assertz(product(Id,Nome,NewQuant,Preco,Data)).
 
@@ -68,13 +74,15 @@ update_id(OldId):-
     forall(product(Id,Nome,Quantidade,Preco,Data), not(OldId<Id);update_product_id(Id)).
 
 %Update a price of product in the knowledge base.
-%TODO: Add a check to verify if the ID exists.
-%TODO: Add a check to verify if the price is valid.
-%TODO: Add a check to verify if the price is different from the old one.
+%TODO: Add a check to verify if the ID exists. DONE.
+%TODO: Add a check to verify if the price is valid. DONE.
 update_price(Id,NewPreco):-
+    call(product(Id,_,_,_,_)),
+    util:check_price(NewPreco),
     retract(product(Id,Nome,Quantidade,Preco,Data)),
     assertz(product(Id,Nome,Quantidade,NewPreco,Data)).
 
+%Returns all products with quantity equals to 0 in the knowledge base.
 verify_storage(Product, ProductVazios).
 
 verify_expired_product(Id):-
@@ -85,6 +93,7 @@ verify_expired_product(Id):-
     diff_days(CurrentTime, ProductTime, Diff),
     Diff>0.
 
+%Returns all products expired in the knowledge base.
 verify_expired_storage:-
     forall(product(Id, Nome, Quantidade, Preco, Data), not(verify_expired_product(Id)); 
     (
@@ -119,11 +128,14 @@ parse_date(String, Date):-
 	number_chars(Year, [C7,C8,C9,C10]),
 	date(Year,Month,Day) = Date.
 
-%Checks if a product is valid.
-check_product(Nome, Quantidade, Preco, Data):-
-    Nome \= '',
-    Quantidade \= '',
-    Preco \= '',
-    Data \= '',
-    Preco > 0,
-    Quantidade > 0.
+%Prints a product in the knowledge base.
+print_prod(product(Id,Nome,Quantidade,Preco,Data)):-
+    write(Id),
+    write(" | "),
+    write(Nome),
+    write(" | "),
+    write(Quantidade),
+    write(" | "),
+    write(Preco),
+    write(" | "),
+    write(Data),nl.
