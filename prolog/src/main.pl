@@ -143,6 +143,7 @@ delete:-
     TODO:
 */
 filterByValidade:-
+    nl,
     storage:verify_expired_storage,
     prompt.
 
@@ -162,23 +163,8 @@ checaValidade:-
     Verifica produtos com quantidade menor igual a zero
 */
 filterByQuantityZero:-
-    write("Produtos com quantidade zerada:"),
     nl,
-    forall(storage:product(Id, Nome, Quantidade, Preco, Data),
-        (
-            not(Quantidade =< 0);
-            write(Id),
-            write(" | "),
-            write(Nome),
-            write(" | "),
-            write(Quantidade),
-            write(" | "),
-            write(Preco),
-            write(" | "),
-            write(Data),
-            nl
-        )
-    ),
+    verify_storage,
     prompt.
 
 main:- 

@@ -1,4 +1,4 @@
-:- module(storage, [read_storage/0, write_storage/0, delete_product/1, add_product/1, update_price/2, update_quantity/2]).
+:- module(storage, [read_storage/0, write_storage/0, delete_product/1, add_product/1, update_price/2, update_quantity/2, verify_storage/0]).
 
 :- use_module(library(csv)).
 :- use_module(util).
@@ -6,17 +6,33 @@
 :- dynamic
     product/5.
 
+create_storage_file:-
+    open('storage.csv', write, Stream),
+    close(Stream).
+
 %Reads the CSV file and returns a list of rules.
 read_storage:-
     clean_up,
-    csv_read_file('storage-example.csv',Products,[functor(product)]),
-    assert_storage(Products),
-    write('Storage loaded.'),nl.
+    exists_file('storage.csv'),
+    csv_read_file('storage.csv',Products,[functor(product)]),
+    assert_storage(Products).
+
+read_storage:-
+    clean_up,
+    not(exists_file('storage.csv')),
+    create_storage_file.
 
 %Writes the rules in the CSV file.
 write_storage:-
+    exists_file('storage.csv'),
     condense_prod(Products),
-    csv_write_file('storage-example.csv', Products).
+    csv_write_file('storage.csv', Products).
+
+write_storage:-
+    not(exists_file('storage.csv')),
+    create_storage_file,
+    condense_prod(Products),
+    csv_write_file('storage.csv', Products).
 
 %Writes the rules in the knowledge base.
 assert_storage(Products):-
@@ -45,7 +61,7 @@ add_product(Product):-
 generate_id(NextId):-
     findall(Id,product(Id,_,_,_,_),Ids),
     length(Ids,LastId),
-    NextId is LastId + 1.
+    NextId is LastId.
 
 %Remove a product from the knowledge base by ID.
 %TODO: Add a check to verify if the ID exists. DONE.
@@ -83,7 +99,22 @@ update_price(Id,NewPreco):-
     assertz(product(Id,Nome,Quantidade,NewPreco,Data)).
 
 %Returns all products with quantity equals to 0 in the knowledge base.
-verify_storage(Product, ProductVazios).
+verify_storage:-
+    forall(product(Id, Nome, Quantidade, Preco, Data),
+        (
+            not(Quantidade =< 0);
+            write(Id),
+            write(" | "),
+            write(Nome),
+            write(" | "),
+            write(Quantidade),
+            write(" | "),
+            write(Preco),
+            write(" | "),
+            write(Data),
+            nl
+        )
+    ).
 
 verify_expired_product(Id):-
     product(Id,Nome,Quantidade,Preco,DateString),
