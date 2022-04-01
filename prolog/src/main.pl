@@ -1,4 +1,5 @@
 :- use_module('storage.pl').
+:- use_module(util, [read_string/1]).
 
 :- dynamic
     product/5.
@@ -35,18 +36,25 @@ prompt:-
     (
         Choice == 'c' -> create;
         Choice == 'l' -> list;
-        Choice == 'mq' -> updateQuantity;
-        Choice == 'mp' -> updatePrice;
+        Choice == 'mq' -> update_quantity;
+        Choice == 'mp' -> update_price;
         Choice == 'd' -> delete;
-        Choice == 'v' -> filterByValidade;
-        Choice == 'cv' -> checaValidade;
-        Choice == 'z' -> filterByQuantityZero;
+        Choice == 'v' -> filter_expired;
+        Choice == 'cv' -> verify_expired;
+        Choice == 'z' -> filter_out_of_stock;
         Choice == 'h' -> menu;
         Choice == 'q' -> write_storage(), halt;
         write("Comando inválido!"),
         nl,
         prompt
     ).
+
+prompt:-
+    true,
+    nl,
+    write("Dados inválidos!"),
+    nl,
+    prompt.
 
 /*
     Adiciona um novo produto ao inventário
@@ -96,7 +104,7 @@ list:-
     TODO: validar os dados de entrada
     TODO: verificar se o produto com o Id existe
 */
-updateQuantity:-
+update_quantity:-
     write("Digite o id do produto: "),
     nl,
     read(Id),
@@ -113,7 +121,7 @@ updateQuantity:-
     TODO: validar os dados de entrada
     TODO: verificar se o produto com o Id existe
 */
-updatePrice:-
+update_price:-
     write("Digite o id do produto: "),
     nl,
     read(Id),
@@ -142,7 +150,7 @@ delete:-
     Verifica validade dos produtos
     TODO:
 */
-filterByValidade:-
+filter_expired:-
     nl,
     storage:verify_expired_storage,
     prompt.
@@ -151,10 +159,11 @@ filterByValidade:-
     Verifica validade de um produto
     TODO: 
 */
-checaValidade:-
+verify_expired:-
     write("Digite o id do produto: "),
     nl,
     read(Id),
+    storage:check_product_exists(Id),
     (storage:verify_expired_product(Id) -> write("Produto com validade vencida!"); 
     write("Produto com validade válida!")),
     prompt.
@@ -162,7 +171,7 @@ checaValidade:-
 /*
     Verifica produtos com quantidade menor igual a zero
 */
-filterByQuantityZero:-
+filter_out_of_stock:-
     nl,
     verify_storage,
     prompt.

@@ -6,160 +6,166 @@
 :- dynamic
     product/5.
 
+%% create_storage_file is det.
+%Creates the storage file if it doesn't exist.
 create_storage_file:-
     open('storage.csv', write, Stream),
     close(Stream).
 
-%Reads the CSV file and returns a list of rules.
+%% read_storage is multi
+%Reads the CSV file and returns a list of facts.
 read_storage:-
     clean_up,
     exists_file('storage.csv'),
     csv_read_file('storage.csv',Products,[functor(product)]),
     assert_storage(Products).
 
+% Reads the CSV file and returns a list of facts.
+%If the file does not exist, it creates a new one, and returns an empty list.
 read_storage:-
     clean_up,
     not(exists_file('storage.csv')),
     create_storage_file.
 
-%Writes the rules in the CSV file.
+%% write_storage is multi
+%Writes the facts in the CSV file.
 write_storage:-
     exists_file('storage.csv'),
     condense_prod(Products),
     csv_write_file('storage.csv', Products).
 
+%Writes the facts in the CSV file.
+%If the file does not exist, it creates a new one, and writes the facts.
 write_storage:-
     not(exists_file('storage.csv')),
     create_storage_file,
     condense_prod(Products),
     csv_write_file('storage.csv', Products).
 
+%% assert_storage(+Products) is det
 %Writes the rules in the knowledge base.
+% @param Products is a list of facts.
 assert_storage(Products):-
     maplist(assertz, Products).
 
+%% condense_prod(-Products) is det
 %Condenses the Products of the knowledge base into a list.
+% @param Products is a list of facts.
 condense_prod(Products):-
     findall(product(Id,Nome,Quantidade,Preco,Data),product(Id,Nome,Quantidade,Preco,Data),Products).
 
+%% clean_up is det
 %Resets the knowledge base, to avoid reading twice.
 clean_up:-
     retractall(product(_,_,_,_,_)).
 
+%% add_product(+Product) is det
 %Add a product to the knowledge base.
-%TODO: Add a check to avoid empty fields. DONE.
-%TODO: Add a check to verify if the fields are valid. DONE.
+% @param Product is a fact.
 %TODO: Verify if a date is valid.
-%TODO: Add a generation of the ID. DONE.
 add_product(Product):-
-    generate_id(Id),
+    generate_id_length(Id),
     Product = product(Id,Nome,Quantidade,Preco,Data),
     util:check_product(Nome,Quantidade,Preco,Data),
     assertz(Product).
 
+%% generate_id_length(-Id) is det
 %Generates an ID for a product.
-generate_id(NextId):-
+% @param Id is an integer.
+generate_id_length(NextId):-
     findall(Id,product(Id,_,_,_,_),Ids),
     length(Ids,LastId),
     NextId is LastId.
 
+%% generate_id_empty(-Id) is det
+%Generates an ID for a product by the empty spot at the knowledge base.
+% @param NextId is an integer.
+generate_id_empty(NextId):-
+    call(product(NextId,_,_,_,_)),
+    NextId is Id + 1,
+    generate_id_empty(NextId).
+
+%% generate_id_empty(+Id) is det
+%Ends the generation of an ID for a product.
+% @param NextId is an integer.
+generate_id_empty(NextId).
+
+%% delete_product(+Id) is semidet
 %Remove a product from the knowledge base by ID.
-%TODO: Add a check to verify if the ID exists. DONE.
+% @param Id is an integer.
 delete_product(Id):- 
     call(product(Id,_,_,_,_)),
     retract(product(Id,_,_,_,_)),
     update_id(Id).
 
+%% update_id(+Id) is det
 %Update a ID of product in the knowledge base.
+% @param Id is an integer.
 update_product_id(Id):-
     NewId is Id - 1,
     retract(product(Id,Nome,Quantidade,Preco,Data)),
     assertz(product(NewId,Nome,Quantidade,Preco,Data)).
 
+%% update_quantity(+Id, +Quantity) is semidet
 %Update the quantity of a product in the knowledge base.
-%TODO: Add a check to verify if the ID exists. DONE.
-%TODO: Add a check to verify if the quantity is valid. DONE.
+% @param Id is an integer.
+% @param NewQuantity is an integer.
 update_quantity(Id,NewQuant):-
     call(product(Id,_,_,_,_)),
     util:check_quantity(NewQuant),
-    retract(product(Id,Nome,Quantidade,Preco,Data)),
+    retract(product(Id,Nome,_,Preco,Data)),
     assertz(product(Id,Nome,NewQuant,Preco,Data)).
 
+%% update_id(+Id) is det
 %Update the Id of all products greater than Old Id in the knowledge base.
+% @param Id is an integer.
 update_id(OldId):-
-    forall(product(Id,Nome,Quantidade,Preco,Data), not(OldId<Id);update_product_id(Id)).
+    forall(product(Id,_,_,_,_), not(OldId<Id);update_product_id(Id)).
 
+%% update_price(+Id, +Price) is semidet
 %Update a price of product in the knowledge base.
-%TODO: Add a check to verify if the ID exists. DONE.
-%TODO: Add a check to verify if the price is valid. DONE.
+% @param Id is an integer.
+% @param Price is a float.
 update_price(Id,NewPreco):-
     call(product(Id,_,_,_,_)),
     util:check_price(NewPreco),
-    retract(product(Id,Nome,Quantidade,Preco,Data)),
+    retract(product(Id,Nome,Quantidade,_,Data)),
     assertz(product(Id,Nome,Quantidade,NewPreco,Data)).
 
+%% verify_storage is det
 %Returns all products with quantity equals to 0 in the knowledge base.
 verify_storage:-
     forall(product(Id, Nome, Quantidade, Preco, Data),
         (
             not(Quantidade =< 0);
-            write(Id),
-            write(" | "),
-            write(Nome),
-            write(" | "),
-            write(Quantidade),
-            write(" | "),
-            write(Preco),
-            write(" | "),
-            write(Data),
-            nl
+            print_prod(product(Id, Nome, Quantidade, Preco, Data))
         )
     ).
 
+%% verify_expired_product(+Id) is semidet
+%Returns a product expired in the knowledge base.
+% @param Id is an integer.
 verify_expired_product(Id):-
-    product(Id,Nome,Quantidade,Preco,DateString),
-    parse_date(DateString, Date),
+    product(Id,_,_,_,DateString),
+    util:parse_date(DateString, Date),
     date_time_stamp(Date, ProductTime),
     get_time(CurrentTime),
-    diff_days(CurrentTime, ProductTime, Diff),
+    util:diff_days(CurrentTime, ProductTime, Diff),
     Diff>0.
 
+%% verify_expired_storage is det
 %Returns all products expired in the knowledge base.
 verify_expired_storage:-
-    forall(product(Id, Nome, Quantidade, Preco, Data), not(verify_expired_product(Id)); 
-    (
-    write(Id),
-    write(" | "),
-    write(Nome),
-    write(" | "),
-    write(Quantidade),
-    write(" | "),
-    write(Preco),
-    write(" | "),
-    write(Data),nl)
+    forall(product(Id, Nome, Quantidade, Preco, Data),  
+        (
+            not(verify_expired_product(Id));
+            print_prod(product(Id, Nome, Quantidade, Preco, Data))
+        )
     ).
 
-/*
-    Calculates the difference between two Timestamps in days.
-*/
-diff_days(Time1, Time2, Diff):-
-    stamp_date_time(Time1, DateTime, local),
-    date_time_value(date, DateTime, Date),
-	date(YYYY, MM, DD) = Date,
-	date_time_stamp(date(YYYY,MM,DD,0,0,0,0,-,-), Time1Date),
-    Diff is (Time1Date - Time2) / 86400.
-
-/*
-    Parses a String in the DD/MM/YYYY format into a Date.
-*/
-parse_date(String, Date):-
-	atom_chars(String, [C1,C2,C3,C4,C5,C6,C7,C8,C9,C10]),
-	number_chars(Day, [C1,C2]),
-	number_chars(Month, [C4,C5]),
-	number_chars(Year, [C7,C8,C9,C10]),
-	date(Year,Month,Day) = Date.
-
+%% print_prod(+Product) is det
 %Prints a product in the knowledge base.
+% @param Product is a fact.
 print_prod(product(Id,Nome,Quantidade,Preco,Data)):-
     write(Id),
     write(" | "),
@@ -170,3 +176,5 @@ print_prod(product(Id,Nome,Quantidade,Preco,Data)):-
     write(Preco),
     write(" | "),
     write(Data),nl.
+check_product_exists(Id):-
+    call(product(Id,_,_,_,_)).
