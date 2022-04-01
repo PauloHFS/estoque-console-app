@@ -163,6 +163,7 @@ checaValidade:-
     write("Digite o id do produto: "),
     nl,
     read(Id),
+    storage:check_product_exists(Id),
     (storage:verify_expired_product(Id) -> write("Produto com validade vencida!"); 
     write("Produto com validade válida!")),
     prompt.

@@ -33,8 +33,8 @@ check_price(NewPrice):-
 check_date(Date):-
 	atom_chars(Date, [C1,C2,C3,C4,C5,C6,C7,C8,C9,C10]),
     forall(member(X,[C1,C2,C4,C5,C7,C8,C9,C10]), char_type(X, digit)),
-    C3 =:= '/',
-   	C6 =:= '/'.
+    C3 == '/',
+   	C6 = '/'.
        
 %% read_string(-String) is nondet
 %Reads a line from the terminal and returns it as String.

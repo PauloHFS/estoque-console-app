@@ -163,3 +163,5 @@ print_prod(product(Id,Nome,Quantidade,Preco,Data)):-
     write(Preco),
     write(" | "),
     write(Data),nl.
+check_product_exists(Id):-
+    call(product(Id,_,_,_,_)).
