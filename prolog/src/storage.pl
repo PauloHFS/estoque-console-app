@@ -96,18 +96,18 @@ update_product_id(Id):-
 %% update_quantity(+Id, +Quantity) is semidet
 %Update the quantity of a product in the knowledge base.
 % @param Id is an integer.
-% @param Quantity is an integer.
+% @param NewQuantity is an integer.
 update_quantity(Id,NewQuant):-
     call(product(Id,_,_,_,_)),
     util:check_quantity(NewQuant),
-    retract(product(Id,Nome,Quantidade,Preco,Data)),
+    retract(product(Id,Nome,_,Preco,Data)),
     assertz(product(Id,Nome,NewQuant,Preco,Data)).
 
 %% update_id(+Id) is det
 %Update the Id of all products greater than Old Id in the knowledge base.
 % @param Id is an integer.
 update_id(OldId):-
-    forall(product(Id,Nome,Quantidade,Preco,Data), not(OldId<Id);update_product_id(Id)).
+    forall(product(Id,_,_,_,_), not(OldId<Id);update_product_id(Id)).
 
 %% update_price(+Id, +Price) is semidet
 %Update a price of product in the knowledge base.
@@ -116,7 +116,7 @@ update_id(OldId):-
 update_price(Id,NewPreco):-
     call(product(Id,_,_,_,_)),
     util:check_price(NewPreco),
-    retract(product(Id,Nome,Quantidade,Preco,Data)),
+    retract(product(Id,Nome,Quantidade,_,Data)),
     assertz(product(Id,Nome,Quantidade,NewPreco,Data)).
 
 %% verify_storage is det
@@ -133,7 +133,7 @@ verify_storage:-
 %Returns a product expired in the knowledge base.
 % @param Id is an integer.
 verify_expired_product(Id):-
-    product(Id,Nome,Quantidade,Preco,DateString),
+    product(Id,_,_,_,DateString),
     util:parse_date(DateString, Date),
     date_time_stamp(Date, ProductTime),
     get_time(CurrentTime),
